@@ -538,6 +538,42 @@ let selectedPayOpt="pack";
 let selectedTipVal=0, selectedTipPhotos=0, selectedTipIng=0;
 let comboSelected=[];
 
+// ── CADASTRO & GEO FUNCTIONS ──
+function saveCadastro(){
+  var nome=document.getElementById("cad-nome").value.trim();
+  var tel=document.getElementById("cad-tel").value.trim();
+  var email=document.getElementById("cad-email").value.trim();
+  if(!nome||!tel){alert("Por favor preencha nome e telefone.");return;}
+  var user={nome:nome,tel:tel,email:email,since:new Date().toISOString()};
+  localStorage.setItem("cn_user",JSON.stringify(user));
+  document.getElementById("cadastro-screen").classList.add("hidden");
+  if(!localStorage.getItem("cn_geo_answered")){
+    document.getElementById("geo-screen").classList.remove("hidden");
+  } else {
+    document.getElementById("screen-profile").classList.remove("hidden");
+  }
+}
+
+function allowGeo(){
+  localStorage.setItem("cn_geo_answered","1");
+  document.getElementById("geo-screen").classList.add("hidden");
+  if(document.getElementById("screen-main").classList.contains("hidden")&&
+     document.getElementById("screen-profile").classList.contains("hidden")){
+    document.getElementById("screen-profile").classList.remove("hidden");
+  } else {
+    getLocation();
+  }
+}
+
+function skipGeo(){
+  localStorage.setItem("cn_geo_answered","1");
+  document.getElementById("geo-screen").classList.add("hidden");
+  if(document.getElementById("screen-main").classList.contains("hidden")&&
+     document.getElementById("screen-profile").classList.contains("hidden")){
+    document.getElementById("screen-profile").classList.remove("hidden");
+  }
+}
+
 function loadUsage(){
   const today=new Date().toISOString().slice(0,10);
   try{
