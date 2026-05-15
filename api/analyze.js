@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.OPENROUTER_KEY;
   if (!apiKey) return res.status(500).json({ error: "Chave nao configurada." });
 
-  const model = "nvidia/nemotron-3-super-120b-a12b:free";
+  const model = "z-ai/glm-4.5-air:free";
   let messages;
 
   if (isCombo) {
