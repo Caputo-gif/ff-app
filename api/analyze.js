@@ -1,28 +1,34 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { imageData, mediaType, profile, locationCtx, comboPrompt, isCombo } = req.body;
+  let body;
+  try {
+    body = req.body;
+  } catch(e) {
+    return res.status(400).json({ error: "Body inválido: " + e.message });
+  }
+
+  const { imageData, mediaType, profile, locationCtx, comboPrompt, isCombo } = body || {};
 
   const apiKey = process.env.OPENROUTER_KEY;
-  if (!apiKey) return res.status(500).json({ error: "Chave de API não configurada." });
+  if (!apiKey) return res.status(500).json({ error: "OPENROUTER_KEY não configurada no servidor." });
 
   let model, messages;
 
   if (isCombo) {
-    // Combo mode - text only, use a reliable text model
     model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
+    const textPrompt = comboPrompt || "Crie 3 receitas combinando ingredientes diversos.";
     messages = [{
       role: "user",
-      content: comboPrompt + " Responda SOMENTE com JSON valido sem markdown. Campos obrigatorios: titulo (string), receitas (array de 3 objetos com n, tipo, tempo, desc, ingredientes array, passos array, dica), nutri (string), harmonizacao (string)."
+      content: textPrompt + " Responda SOMENTE com JSON valido sem markdown nem texto extra. Estrutura obrigatoria: {\"titulo\":\"string\",\"receitas\":[{\"n\":\"nome\",\"tipo\":\"tipo\",\"tempo\":\"Xmin\",\"desc\":\"desc\",\"ingredientes\":[\"item1\",\"item2\"],\"passos\":[\"passo1\",\"passo2\"],\"dica\":\"dica\"}],\"nutri\":\"string\",\"harmonizacao\":\"string\"}"
     }];
   } else {
-    // Image analysis mode
-    if (!imageData || !mediaType) return res.status(400).json({ error: "Imagem obrigatória." });
-
+    if (!imageData || !mediaType) {
+      return res.status(400).json({ error: "imageData e mediaType são obrigatórios para análise de foto." });
+    }
     model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
     const locationInfo = locationCtx || "Use precos medios do Brasil.";
-    const prompt = "Voce e um chef especialista em culinaria brasileira. Identifique o alimento na imagem. Nivel do usuario: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos: nome, emoji, categoria, confianca (Alta|Media|Baixa), tags (array 3), desc (2 frases), grid (array 4 pares [[chave,valor]]), preco ({valor,referencia,dica,melhorEpoca}), nutri (array 4 pares [[nutriente,numero]]), curiosidades (array 3), tecnicas (array 3), receitas (array 3 com {n,tipo,tempo}), receita_detalhada ({n,tempo,rend,ing,steps,tip,emplatamento}).";
-
+    const prompt = "Voce e um chef especialista em culinaria brasileira. Identifique o alimento na imagem. Nivel: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos: nome, emoji, categoria, confianca (Alta|Media|Baixa), tags (array 3), desc (2 frases), grid (array 4 pares [[chave,valor]]), preco ({valor,referencia,dica,melhorEpoca}), nutri (array 4 pares [[nutriente,numero]]), curiosidades (array 3), tecnicas (array 3), receitas (array 3 com {n,tipo,tempo}), receita_detalhada ({n,tempo,rend,ing,steps,tip,emplatamento}).";
     messages = [{
       role: "user",
       content: [
@@ -31,9 +37,6 @@ export default async function handler(req, res) {
       ]
     }];
   }
-
-  console.log("Mode:", isCombo ? "combo" : "image", "Model:", model);
-  console.log("Messages type:", isCombo ? "text" : "image+text");
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -51,38 +54,43 @@ export default async function handler(req, res) {
       })
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const err = await response.text();
-      console.error("OpenRouter error status:", response.status, "body:", err);
-      return res.status(502).json({ error: "Erro ao conectar: " + response.status });
+      console.error("OpenRouter error:", response.status, responseText.slice(0, 300));
+      return res.status(502).json({ error: "Erro OpenRouter " + response.status + ": " + responseText.slice(0, 100) });
     }
 
-    const data = await response.json();
-    if (data.error) return res.status(500).json({ error: data.error.message || "Erro da IA" });
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch(e) {
+      return res.status(500).json({ error: "Resposta não é JSON: " + responseText.slice(0, 100) });
+    }
 
-    let text = (data.choices[0].message.content || "").trim();
-    // Remove thinking tags from reasoning models
+    if (data.error) {
+      return res.status(500).json({ error: "Erro da IA: " + (data.error.message || JSON.stringify(data.error)) });
+    }
+
+    let text = (data.choices?.[0]?.message?.content || "").trim();
     text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    // Remove markdown fences
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    // Extract JSON object
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error("No JSON found in:", text.slice(0, 200));
-      return res.status(500).json({ error: "Resposta da IA inválida. Tente novamente." });
+      return res.status(500).json({ error: "JSON não encontrado. Resposta: " + text.slice(0, 150) });
     }
+
     let jsonStr = jsonMatch[0];
-    // Fix unquoted keys
     jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-    // Fix trailing commas
     jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
 
     try {
       return res.status(200).json(JSON.parse(jsonStr));
     } catch(parseErr) {
-      console.error("Parse error:", parseErr.message, "Raw:", jsonStr.slice(0, 300));
-      return res.status(500).json({ error: "Erro ao interpretar resposta. Tente novamente." });
+      return res.status(500).json({ error: "Parse error: " + parseErr.message + " | " + jsonStr.slice(0, 150) });
     }
+
   } catch (err) {
     console.error("Handler error:", err);
     return res.status(500).json({ error: "Erro interno: " + err.message });
