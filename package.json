@@ -1,7 +1,6 @@
 {
-  "name": "chef-nicolas",
+  "name": "flavor-fusion",
   "version": "1.0.0",
-  "description": "Chef Nicolas — IA culinária com identificação de alimentos, preços regionais e e-commerce",
   "dependencies": {
     "stripe": "^14.0.0"
   },
