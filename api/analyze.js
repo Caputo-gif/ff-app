@@ -40,15 +40,17 @@ export default async function handler(req, res) {
 
     if (data.error) return res.status(500).json({ error: data.error.message || "Erro da IA" });
 
-    let text = (data.choices?.[0]?.message?.content || "").trim();
-    text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+let text = (data.choices?.[0]?.message?.content || "").trim();
+text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+text = text.replace(/[\s\S]*?```json/, "").trim();
+text = text.replace(/```[\s\S]*$/, "").trim();
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.status(500).json({ error: "JSON nao encontrado. Resposta: " + text.slice(0, 100) });
+const jsonMatch = text.match(/\{[\s\S]*\}/);
+if (!jsonMatch) return res.status(500).json({ error: "JSON nao encontrado. Resposta: " + text.slice(0, 200) });
 
-    let jsonStr = jsonMatch[0];
-    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, "$1");
+let jsonStr = jsonMatch[0];
+jsonStr = jsonStr.replace(/,(\s*[}\]])/g, "$1");
+jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, " ");
 
     try {
       return res.status(200).json(JSON.parse(jsonStr));
