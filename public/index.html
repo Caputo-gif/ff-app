@@ -160,20 +160,154 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .shop-notify{width:100%;padding:8px;border-radius:8px;border:1.5px solid #1D9E75;background:none;color:#1D9E75;font-size:12px;font-weight:700;cursor:pointer;margin-top:10px}
 .shop-full{grid-column:1/-1}
 .hidden{display:none!important}
+
+/* ── CADASTRO ── */
+.cadastro-screen{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.cadastro-box{background:#fff;border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2.5rem;width:100%;max-width:480px;animation:slideUp .3s ease}
+.cad-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.cad-sub{font-size:13px;color:#666;margin-bottom:1.25rem;line-height:1.5}
+.cad-input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #ddd;font-size:14px;outline:none;color:#111;margin-bottom:10px;-webkit-appearance:none}
+.cad-input:focus{border-color:#1D9E75}
+.cad-opt{font-size:11px;color:#aaa;text-align:center;margin-bottom:10px}
+.btn-cad{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-cad:active{background:#0F6E56}
+
+/* ── GEO PERMISSION ── */
+.geo-screen{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;display:flex;align-items:flex-end;justify-content:center}
+.geo-box{background:#fff;border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2.5rem;width:100%;max-width:480px;animation:slideUp .3s ease;text-align:center}
+.geo-icon{font-size:48px;margin-bottom:10px}
+.geo-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.geo-desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:1.25rem}
+.geo-benefits{background:#f8f8f8;border-radius:12px;padding:1rem;margin-bottom:1.25rem;text-align:left}
+.geo-benefit{display:flex;align-items:center;gap:8px;font-size:13px;color:#444;margin-bottom:8px}
+.geo-benefit:last-child{margin-bottom:0}
+.btn-geo{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-geo-skip{width:100%;padding:10px;background:none;border:none;font-size:13px;color:#aaa;cursor:pointer}
+
+/* ── GORJETA ── */
+.tip-fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;background:#1D9E75;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,.4);z-index:50;border:none;transition:transform .15s}
+.tip-fab:active{transform:scale(.92)}
+.tip-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.tip-box{background:#fff;border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2.5rem;width:100%;max-width:480px;animation:slideUp .25s ease}
+.tip-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.tip-sub{font-size:13px;color:#666;margin-bottom:1rem;line-height:1.5}
+.tip-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.tip-opt{border:2px solid #eee;border-radius:14px;padding:.9rem .5rem;text-align:center;cursor:pointer;transition:all .15s}
+.tip-opt:active,.tip-opt.sel{border-color:#1D9E75;background:#f0fdf8}
+.tip-amount{font-size:18px;font-weight:700;color:#1D9E75}
+.tip-bonus{font-size:10px;color:#0F6E56;margin-top:3px;line-height:1.3}
+.tip-pix{background:#f0fdf8;border-radius:12px;padding:1rem;margin-bottom:1rem;border:1px solid #9FE1CB}
+.tip-pix-label{font-size:11px;color:#0F6E56;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.tip-pix-key{font-size:15px;font-weight:700;color:#111;margin-bottom:8px}
+.tip-pix-copy{width:100%;padding:9px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.tip-pix-copy:active{background:#0F6E56}
+.tip-confirm{width:100%;padding:12px;background:#E1F5EE;color:#0F6E56;border:1.5px solid #9FE1CB;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.tip-cancel{width:100%;padding:9px;background:none;border:none;font-size:13px;color:#aaa;cursor:pointer}
+
+/* ── COMBINADOR ── */
+.combo-section{padding:.75rem;padding-bottom:3rem}
+.combo-search{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #ddd;font-size:14px;background:#fff;outline:none;color:#111;margin-bottom:.75rem}
+.combo-search:focus{border-color:#1D9E75}
+.combo-selected{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;min-height:40px}
+.combo-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:#1D9E75;color:#fff;font-size:12px;font-weight:700}
+.combo-chip-rm{background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:0;line-height:1}
+.combo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.combo-fc{background:#fff;border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;border:2px solid #eee;transition:all .15s}
+.combo-fc.picked{border-color:#1D9E75;background:#E1F5EE}
+.combo-fc-em{font-size:24px;margin-bottom:3px}
+.combo-fc-nm{font-size:11px;font-weight:700;color:#222}
+.btn-combo{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:1rem}
+.btn-combo:disabled{background:#9FE1CB;cursor:not-allowed}
+.combo-result{background:#fff;border-radius:14px;border:1px solid #eee;overflow:hidden;margin-bottom:1rem}
+.combo-result-hdr{background:#1D9E75;padding:.9rem 1rem;color:#fff}
+.combo-result-title{font-size:16px;font-weight:700}
+.combo-result-body{padding:1rem}
+.combo-rec{background:#f8f8f8;border-radius:10px;padding:10px;margin-bottom:8px}
+.combo-rec-name{font-size:13px;font-weight:700;color:#222}
+.combo-rec-meta{font-size:11px;color:#888;margin-top:3px}
 </style>
 </head>
 <body>
 
+<!-- ── CADASTRO ── -->
+<div class="cadastro-screen hidden" id="cadastro-screen">
+  <div class="cadastro-box">
+    <div style="font-size:36px;text-align:center;margin-bottom:.5rem">🍃</div>
+    <div class="cad-title" style="text-align:center">Bem-vindo ao Flavor Fusion!</div>
+    <div class="cad-sub" style="text-align:center">Cadastre-se para acessar receitas personalizadas, preços regionais e muito mais.</div>
+    <input class="cad-input" id="cad-nome" placeholder="Seu nome *" type="text">
+    <input class="cad-input" id="cad-tel" placeholder="Telefone com DDD * (ex: 12999999999)" type="tel">
+    <input class="cad-input" id="cad-email" placeholder="E-mail (opcional)" type="email">
+    <div class="cad-opt">* campos obrigatórios</div>
+    <button class="btn-cad" onclick="saveCadastro()">Entrar no Flavor Fusion →</button>
+  </div>
+</div>
+
+<!-- ── GEO PERMISSION ── -->
+<div class="geo-screen hidden" id="geo-screen">
+  <div class="geo-box">
+    <div class="geo-icon">📍</div>
+    <div class="geo-title">Ativar localização</div>
+    <div class="geo-desc">Para mostrar os <strong>preços reais dos alimentos na sua cidade</strong> e receitas com ingredientes da sua região, precisamos saber onde você está.</div>
+    <div class="geo-benefits">
+      <div class="geo-benefit">✅ Preços atualizados da sua cidade</div>
+      <div class="geo-benefit">✅ Ingredientes disponíveis na sua região</div>
+      <div class="geo-benefit">✅ Feiras e mercados próximos (em breve)</div>
+      <div class="geo-benefit">🔒 Sua localização nunca é compartilhada</div>
+    </div>
+    <button class="btn-geo" onclick="allowGeo()">Permitir localização</button>
+    <button class="btn-geo-skip" onclick="skipGeo()">Agora não — continuar sem localização</button>
+  </div>
+</div>
+
+<!-- ── GORJETA MODAL ── -->
+<div class="tip-modal hidden" id="tip-modal">
+  <div class="tip-box">
+    <div class="tip-title">💚 Apoiar o Flavor Fusion</div>
+    <div class="tip-sub">Gostou do app? Sua contribuição ajuda a manter o serviço e desenvolver novas funcionalidades. Como agradecimento, você ganha créditos!</div>
+    <div class="tip-options">
+      <div class="tip-opt" id="tip-20" onclick="selectTip(20,10,10)">
+        <div class="tip-amount">R$20</div>
+        <div class="tip-bonus">+10 fotos<br>+10 pesquisas</div>
+      </div>
+      <div class="tip-opt" id="tip-50" onclick="selectTip(50,30,30)">
+        <div class="tip-amount">R$50</div>
+        <div class="tip-bonus">+30 fotos<br>+30 pesquisas</div>
+      </div>
+      <div class="tip-opt" id="tip-100" onclick="selectTip(100,70,70)">
+        <div class="tip-amount">R$100</div>
+        <div class="tip-bonus">+70 fotos<br>+70 pesquisas</div>
+      </div>
+    </div>
+    <div class="tip-pix" id="tip-pix-area" style="display:none">
+      <div class="tip-pix-label">Chave PIX</div>
+      <div class="tip-pix-key" id="tip-pix-key">53891380828</div>
+      <div style="font-size:11px;color:#666;margin-bottom:8px" id="tip-pix-inst">Copie a chave, abra seu banco e faça o PIX de <strong id="tip-val-show"></strong></div>
+      <button class="tip-pix-copy" onclick="copyPix()">📋 Copiar chave PIX</button>
+    </div>
+    <button class="tip-confirm hidden" id="tip-confirm-btn" onclick="confirmTip()">✅ Já fiz o PIX — liberar meus créditos</button>
+    <button class="tip-cancel" onclick="closeTip()">Fechar</button>
+  </div>
+</div>
+
+<!-- ── TIP FAB ── -->
+<button class="tip-fab hidden" id="tip-fab" onclick="openTip()" title="Apoiar o Flavor Fusion">💚</button>
+
 <div class="modal-backdrop hidden" id="modal-photo">
   <div class="modal">
     <div class="modal-title">📷 Análise por IA</div>
-    <div class="modal-sub">Para identificar este alimento com IA, ver preços na sua região e obter receitas personalizadas:</div>
-    <div class="pay-option">
+    <div class="modal-sub">Identifique o alimento, veja preços na sua região e receba receitas personalizadas.</div>
+    <div class="pay-option" id="pay-photo-single" onclick="selectPayOpt('single')" style="margin-bottom:8px">
       <span class="pay-icon">📸</span>
-      <div class="pay-name">1 análise de foto<br><span class="pay-desc" style="font-weight:400">Alimento identificado, preços regionais, receitas e nutrição</span></div>
-      <div class="pay-price">R$1,00</div>
+      <div><div class="pay-name">1 foto avulsa</div><div style="font-size:11px;color:#666;margin-top:2px">Análise completa com preços regionais</div></div>
+      <div class="pay-price">R$5</div>
     </div>
-    <button class="btn-pay" onclick="pay('photo')">Pagar R$1,00 e analisar</button>
+    <div class="pay-option" id="pay-photo-pack" onclick="selectPayOpt('pack')" style="border-color:#1D9E75;background:#f0fdf8">
+      <span class="pay-icon">📦</span>
+      <div><div class="pay-name">Pacote 4 fotos</div><div style="font-size:11px;color:#0F6E56;margin-top:2px">Economia de R$10!</div></div>
+      <div class="pay-price">R$10</div>
+    </div>
+    <button class="btn-pay" id="btn-pay-photo" onclick="payPhoto()">Pagar R$10 — 4 fotos</button>
     <button class="btn-cancel" onclick="closeModal('modal-photo')">Cancelar</button>
   </div>
 </div>
@@ -181,13 +315,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <div class="modal-backdrop hidden" id="modal-ingredient">
   <div class="modal">
     <div class="modal-title">🔒 Limite diário atingido</div>
-    <div class="modal-sub">Você usou suas <strong>3 pesquisas gratuitas</strong> de ingredientes hoje. Libere acesso ilimitado por hoje:</div>
-    <div class="pay-option">
-      <span class="pay-icon">🌟</span>
-      <div class="pay-name">Acesso ilimitado hoje<br><span style="font-size:12px;color:#666;font-weight:400">Pesquise todos os ingredientes até meia-noite. Renova amanhã.</span></div>
-      <div class="pay-price">R$2,00</div>
+    <div class="modal-sub">Você usou suas <strong>3 pesquisas gratuitas</strong> de ingredientes hoje. Compre mais pesquisas:</div>
+    <div class="pay-option" style="border-color:#1D9E75;background:#f0fdf8">
+      <span class="pay-icon">🔍</span>
+      <div><div class="pay-name">10 pesquisas na biblioteca</div><div style="font-size:11px;color:#0F6E56;margin-top:2px">Válidas por 30 dias</div></div>
+      <div class="pay-price">R$5</div>
     </div>
-    <button class="btn-pay" onclick="pay('unlimited')">Liberar por R$2,00</button>
+    <button class="btn-pay" onclick="pay('ingredients')">Comprar 10 pesquisas — R$5</button>
     <button class="btn-cancel" onclick="closeModal('modal-ingredient')">Agora não</button>
   </div>
 </div>
@@ -238,6 +372,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     <div class="main-tabs">
       <div class="main-tab active" onclick="switchTab('camera')">📷 Câmera</div>
       <div class="main-tab" onclick="switchTab('library')">📚 Alimentos</div>
+      <div class="main-tab" onclick="switchTab('combo')">🔀 Combinar</div>
       <div class="main-tab" onclick="switchTab('shop')">🛒 Loja</div>
     </div>
 
@@ -317,6 +452,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <div class="food-grid" id="food-grid"></div>
     </div>
 
+    <!-- ── COMBINADOR TAB ── -->
+    <div id="tab-combo" class="hidden">
+      <div class="combo-section">
+        <div style="font-size:13px;color:#666;margin-bottom:.75rem;line-height:1.5">Selecione 2 ou mais alimentos para descobrir receitas, harmonizações e informações nutricionais combinadas.</div>
+        <input class="combo-search" id="combo-srch" placeholder="🔍 Buscar alimento..." oninput="renderComboGrid()">
+        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Selecionados</div>
+        <div class="combo-selected" id="combo-selected">
+          <div style="font-size:12px;color:#aaa;padding:8px 0">Nenhum alimento selecionado ainda</div>
+        </div>
+        <button class="btn-combo" id="btn-combo" onclick="generateCombo()" disabled>🔀 Gerar receitas combinadas</button>
+        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Escolha os alimentos</div>
+        <div class="combo-grid" id="combo-grid"></div>
+        <div id="combo-result-area" style="display:none">
+          <div class="combo-result">
+            <div class="combo-result-hdr">
+              <div class="combo-result-title" id="combo-result-title">Receitas combinadas</div>
+            </div>
+            <div class="combo-result-body">
+              <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Receitas sugeridas</div>
+              <div id="combo-recs"></div>
+              <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin:12px 0 8px">Dica nutricional</div>
+              <div id="combo-nutri" style="font-size:13px;color:#555;line-height:1.6"></div>
+              <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin:12px 0 8px">Harmonização</div>
+              <div id="combo-harm" style="font-size:13px;color:#555;line-height:1.6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="tab-shop" class="hidden">
       <div class="shop-section">
         <div class="shop-banner">
@@ -367,8 +532,11 @@ const CATS=["Todos","Fruta","Carne","Peixe","Grão","Carboidrato","Vegetal","Lat
 const FREE_ING=3;
 let selProfile=0, selCat="Todos", curFood=null, camActive=false, camStream=null;
 let userLoc={lat:null,lon:null,city:null};
-let usage={photos:0,ingredients:0,unlimited:false};
+let usage={photos:0,ingredients:0,bonusPhotos:0,bonusIng:0};
 let pendingAct=null;
+let selectedPayOpt="pack";
+let selectedTipVal=0, selectedTipPhotos=0, selectedTipIng=0;
+let comboSelected=[];
 
 function loadUsage(){
   const today=new Date().toISOString().slice(0,10);
@@ -434,7 +602,7 @@ function startApp(){
   lc.style.background=p.color;
   lc.style.color=p.tc;
   loadUsage();
-  getLocation();
+  document.getElementById("tip-fab").classList.remove("hidden");
   const params=new URLSearchParams(window.location.search);
   const type=params.get("type");
   const sid=params.get("session_id");
@@ -529,7 +697,11 @@ function handleFile(e){
     document.getElementById("img-prev").style.display="block";
     document.getElementById("cam-ph").style.display="none";
     pendingAct=function(){analyzeImg(ev.target.result);};
-    openModal("modal-photo");
+    if(usage.bonusPhotos>0){
+      pendingAct();pendingAct=null;
+    } else {
+      openModal("modal-photo");
+    }
   };
   r.readAsDataURL(f);
 }
@@ -550,6 +722,9 @@ function snap(){
 }
 
 function analyzeImg(dataUrl){
+  // Consume a photo credit
+  if(usage.bonusPhotos>0){usage.bonusPhotos--;}
+  saveUsage();updateUsageUI();
   document.getElementById("scan-ov").classList.add("on");
   document.getElementById("result-area").style.display="none";
   document.getElementById("rd-area").style.display="none";
@@ -708,6 +883,172 @@ function libSelect(el){
   document.getElementById("price-badge").classList.add("hidden");
   displayResult({nome:f.name,emoji:f.emoji,categoria:f.cat,tags:f.tags,desc:f.desc,grid:f.grid,preco:f.preco,nutri:f.nutri,curiosidades:f.curio,tecnicas:f.tecnicas,receitas:f.receitas,receita_detalhada:f.rd},false);
   setStatus("📚 "+f.name+" — Perfil: "+PROFILES[selProfile].name);
+}
+
+// ── PAY FUNCTIONS ──
+function selectPayOpt(opt){
+  selectedPayOpt=opt;
+  var s=document.getElementById("pay-photo-single");
+  var p=document.getElementById("pay-photo-pack");
+  var btn=document.getElementById("btn-pay-photo");
+  if(opt==="single"){
+    s.style.borderColor="#1D9E75";s.style.background="#f0fdf8";
+    p.style.borderColor="#eee";p.style.background="#fff";
+    btn.textContent="Pagar R$5 — 1 foto";
+  } else {
+    p.style.borderColor="#1D9E75";p.style.background="#f0fdf8";
+    s.style.borderColor="#eee";s.style.background="#fff";
+    btn.textContent="Pagar R$10 — 4 fotos";
+  }
+}
+
+function payPhoto(){
+  closeModal("modal-photo");
+  if(selectedPayOpt==="single"){
+    usage.bonusPhotos+=1;
+  } else {
+    usage.bonusPhotos+=4;
+  }
+  saveUsage();updateUsageUI();
+  setStatus("✅ Créditos adicionados! Analisando foto...");
+  if(pendingAct){pendingAct();pendingAct=null;}
+}
+
+function pay(type){
+  closeModal("modal-photo");closeModal("modal-ingredient");
+  if(type==="photo"){
+    usage.bonusPhotos+=1;saveUsage();updateUsageUI();
+    setStatus("✅ Crédito adicionado!");
+    if(pendingAct){pendingAct();pendingAct=null;}
+  } else if(type==="ingredients"){
+    usage.bonusIng+=10;saveUsage();updateUsageUI();
+    setStatus("✅ 10 pesquisas adicionadas!");
+    if(pendingAct){pendingAct();pendingAct=null;}
+  }
+}
+
+// ── TIP / GORJETA FUNCTIONS ──
+function openTip(){document.getElementById("tip-modal").classList.remove("hidden");}
+function closeTip(){document.getElementById("tip-modal").classList.add("hidden");}
+
+function selectTip(val,photos,ing){
+  selectedTipVal=val;selectedTipPhotos=photos;selectedTipIng=ing;
+  document.querySelectorAll(".tip-opt").forEach(function(o){o.classList.remove("sel");});
+  document.getElementById("tip-"+val).classList.add("sel");
+  document.getElementById("tip-pix-area").style.display="block";
+  document.getElementById("tip-val-show").textContent="R$"+val;
+  document.getElementById("tip-confirm-btn").classList.remove("hidden");
+}
+
+function copyPix(){
+  var key="53891380828";
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(key).then(function(){
+      var btn=document.querySelector(".tip-pix-copy");
+      btn.textContent="✅ Copiado!";
+      setTimeout(function(){btn.textContent="📋 Copiar chave PIX";},2000);
+    });
+  } else {
+    prompt("Copie a chave PIX:",key);
+  }
+}
+
+function confirmTip(){
+  if(!selectedTipVal)return;
+  // Grant bonus credits
+  usage.bonusPhotos+=selectedTipPhotos;
+  usage.bonusIng+=selectedTipIng;
+  saveUsage();updateUsageUI();
+  // Notify via EmailJS (if configured) or just log
+  var user=JSON.parse(localStorage.getItem("cn_user")||"{}");
+  var msg="🎉 Nova gorjeta! Nome: "+(user.nome||"Anônimo")+" | Tel: "+(user.tel||"-")+" | Valor: R$"+selectedTipVal+" | "+new Date().toLocaleString("pt-BR");
+  // Send notification email via simple fetch to our API
+  fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({msg:msg,nome:user.nome,tel:user.tel,valor:selectedTipVal})
+  }).catch(function(){});
+  closeTip();
+  setStatus("💚 Muito obrigado! "+selectedTipPhotos+" fotos e "+selectedTipIng+" pesquisas adicionadas!");
+  alert("💚 Obrigado pelo apoio! Seus créditos foram adicionados:\n+"+selectedTipPhotos+" fotos\n+"+selectedTipIng+" pesquisas na biblioteca");
+}
+
+// ── COMBO FUNCTIONS ──
+function renderComboGrid(){
+  var q=(document.getElementById("combo-srch")&&document.getElementById("combo-srch").value||"").toLowerCase();
+  var keys=Object.keys(FOODS).filter(function(k){
+    return !q||FOODS[k].name.toLowerCase().includes(q);
+  });
+  document.getElementById("combo-grid").innerHTML=keys.map(function(k){
+    var f=FOODS[k];
+    var picked=comboSelected.indexOf(k)>=0;
+    return '<div class="combo-fc'+(picked?" picked":"")+'" onclick="toggleCombo(this)" data-key="'+k+'"><div class="combo-fc-em">'+f.emoji+'</div><div class="combo-fc-nm">'+f.name+"</div></div>";
+  }).join("");
+}
+
+function toggleCombo(el){
+  var k=el.dataset.key;
+  var idx=comboSelected.indexOf(k);
+  if(idx>=0){
+    comboSelected.splice(idx,1);
+    el.classList.remove("picked");
+  } else {
+    if(comboSelected.length>=5){alert("Máximo de 5 alimentos por combinação.");return;}
+    comboSelected.push(k);
+    el.classList.add("picked");
+  }
+  updateComboSelected();
+}
+
+function updateComboSelected(){
+  var sel=document.getElementById("combo-selected");
+  var btn=document.getElementById("btn-combo");
+  if(comboSelected.length===0){
+    sel.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Nenhum alimento selecionado ainda</div>';
+    btn.disabled=true;
+  } else {
+    sel.innerHTML=comboSelected.map(function(k){
+      var f=FOODS[k];
+      return '<div class="combo-chip">'+f.emoji+' '+f.name+'<button class="combo-chip-rm" onclick="removeCombo(\"'+k+'\")" >×</button></div>';
+    }).join("");
+    btn.disabled=comboSelected.length<2;
+  }
+}
+
+function removeCombo(k){
+  var idx=comboSelected.indexOf(k);
+  if(idx>=0)comboSelected.splice(idx,1);
+  renderComboGrid();
+  updateComboSelected();
+}
+
+function generateCombo(){
+  if(comboSelected.length<2){alert("Selecione pelo menos 2 alimentos.");return;}
+  var btn=document.getElementById("btn-combo");
+  btn.textContent="⏳ Gerando...";btn.disabled=true;
+  var names=comboSelected.map(function(k){return FOODS[k].name;});
+  var emojis=comboSelected.map(function(k){return FOODS[k].emoji;});
+  var p=PROFILES[selProfile];
+  var prompt='Voce e um chef especialista. O usuario tem estes alimentos: '+names.join(', ')+'. Nivel: '+p.prompt+'. Crie 3 receitas que combinam esses ingredientes. Responda APENAS em JSON: {titulo:string,receitas:[{n:nome,tipo:tipo,tempo:Xmin,desc:desc breve}],nutri:paragrafo nutricional,harmonizacao:dica de bebida}';
+  fetch("/api/analyze",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({imageData:null,mediaType:null,profile:p.prompt,locationCtx:"",comboPrompt:prompt,isCombo:true})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
+    if(data.error)throw new Error(data.error);
+    document.getElementById("combo-result-title").textContent=emojis.join("")+" "+names.join(" + ");
+    document.getElementById("combo-recs").innerHTML=(data.receitas||[]).map(function(r){
+      return '<div class="combo-rec"><div class="combo-rec-name">'+r.n+'</div><div class="combo-rec-meta">'+r.tipo+' · ⏱ '+r.tempo+'</div><div style="font-size:12px;color:#666;margin-top:4px">'+r.desc+'</div></div>';
+    }).join("");
+    document.getElementById("combo-nutri").textContent=data.nutri||"";
+    document.getElementById("combo-harm").textContent=data.harmonizacao||"";
+    document.getElementById("combo-result-area").style.display="block";
+  })
+  .catch(function(e){
+    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
+    alert("Erro ao gerar combinação. Tente novamente.");
+  });
 }
 
 function notifyMe(btn){
