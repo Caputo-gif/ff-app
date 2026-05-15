@@ -55,11 +55,25 @@ export default async function handler(req, res) {
     if (data.error) return res.status(500).json({ error: data.error.message || "Erro da IA" });
 
     let text = data.choices[0].message.content || "";
+    // Clean markdown fences and thinking tags
+    text = text.replace(/<think>[\s\S]*?<\/think>/g, "");
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    // Extract JSON object
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.status(500).json({ error: "Resposta da IA inválida." });
-
-    return res.status(200).json(JSON.parse(jsonMatch[0]));
+    if (!jsonMatch) return res.status(500).json({ error: "Resposta da IA invalida: " + text.slice(0,100) });
+    let jsonStr = jsonMatch[0];
+    // Fix common JSON issues from AI models
+    // Replace single quotes used as string delimiters (carefully)
+    // Fix unquoted keys
+    jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+    // Fix trailing commas
+    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+    try {
+      return res.status(200).json(JSON.parse(jsonStr));
+    } catch(parseErr) {
+      console.error("JSON parse error:", parseErr.message, "\nRaw:", jsonStr.slice(0,300));
+      return res.status(500).json({ error: "Erro ao interpretar resposta da IA. Tente novamente." });
+    }
   } catch (err) {
     console.error("Handler error:", err);
     return res.status(500).json({ error: "Erro interno: " + err.message });
