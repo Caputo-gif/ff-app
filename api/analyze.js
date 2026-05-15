@@ -82,13 +82,23 @@ export default async function handler(req, res) {
     }
 
     let jsonStr = jsonMatch[0];
-    jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+
+    // Fix unquoted keys: {titulo: -> {"titulo":
+    jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_áéíóúàâêôãõüçÁÉÍÓÚÀÂÊÔÃÕÜÇ][a-zA-Z0-9_áéíóúàâêôãõüçÁÉÍÓÚÀÂÊÔÃÕÜÇ\s]*)\s*:/g, function(m, pre, key) {
+      return pre + '"' + key.trim() + '":';
+    });
+    // Fix trailing commas
+    jsonStr = jsonStr.replace(/,([\s\n]*[}\]])/g, '$1');
+    // Fix single quotes used as string delimiters
+    jsonStr = jsonStr.replace(/:\s*'([^']*)'/g, ':"$1"');
 
     try {
       return res.status(200).json(JSON.parse(jsonStr));
     } catch(parseErr) {
-      return res.status(500).json({ error: "Parse error: " + parseErr.message + " | " + jsonStr.slice(0, 150) });
+      // Last resort: try to extract partial valid JSON
+      console.error("Parse error:", parseErr.message);
+      console.error("JSON attempt:", jsonStr.slice(0, 500));
+      return res.status(500).json({ error: "Erro ao interpretar resposta. Tente novamente." });
     }
 
   } catch (err) {
