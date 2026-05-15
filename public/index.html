@@ -293,38 +293,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <!-- ── TIP FAB ── -->
 <button class="tip-fab hidden" id="tip-fab" onclick="openTip()" title="Apoiar o Flavor Fusion">💚</button>
 
-<div class="modal-backdrop hidden" id="modal-photo">
-  <div class="modal">
-    <div class="modal-title">📷 Análise por IA</div>
-    <div class="modal-sub">Identifique o alimento, veja preços na sua região e receba receitas personalizadas.</div>
-    <div class="pay-option" id="pay-photo-single" onclick="selectPayOpt('single')" style="margin-bottom:8px">
-      <span class="pay-icon">📸</span>
-      <div><div class="pay-name">1 foto avulsa</div><div style="font-size:11px;color:#666;margin-top:2px">Análise completa com preços regionais</div></div>
-      <div class="pay-price">R$5</div>
-    </div>
-    <div class="pay-option" id="pay-photo-pack" onclick="selectPayOpt('pack')" style="border-color:#1D9E75;background:#f0fdf8">
-      <span class="pay-icon">📦</span>
-      <div><div class="pay-name">Pacote 4 fotos</div><div style="font-size:11px;color:#0F6E56;margin-top:2px">Economia de R$10!</div></div>
-      <div class="pay-price">R$10</div>
-    </div>
-    <button class="btn-pay" id="btn-pay-photo" onclick="payPhoto()">Pagar R$10 — 4 fotos</button>
-    <button class="btn-cancel" onclick="closeModal('modal-photo')">Cancelar</button>
-  </div>
-</div>
 
-<div class="modal-backdrop hidden" id="modal-ingredient">
-  <div class="modal">
-    <div class="modal-title">🔒 Limite diário atingido</div>
-    <div class="modal-sub">Você usou suas <strong>3 pesquisas gratuitas</strong> de ingredientes hoje. Compre mais pesquisas:</div>
-    <div class="pay-option" style="border-color:#1D9E75;background:#f0fdf8">
-      <span class="pay-icon">🔍</span>
-      <div><div class="pay-name">10 pesquisas na biblioteca</div><div style="font-size:11px;color:#0F6E56;margin-top:2px">Válidas por 30 dias</div></div>
-      <div class="pay-price">R$5</div>
-    </div>
-    <button class="btn-pay" onclick="pay('ingredients')">Comprar 10 pesquisas — R$5</button>
-    <button class="btn-cancel" onclick="closeModal('modal-ingredient')">Agora não</button>
-  </div>
-</div>
+
+
 
 <div id="screen-profile">
   <div class="profile-screen">
@@ -768,12 +739,7 @@ function handleFile(e){
     document.getElementById("img-prev").src=ev.target.result;
     document.getElementById("img-prev").style.display="block";
     document.getElementById("cam-ph").style.display="none";
-    pendingAct=function(){analyzeImg(ev.target.result);};
-    if(usage.bonusPhotos>0){
-      pendingAct();pendingAct=null;
-    } else {
-      openModal("modal-photo");
-    }
+    analyzeImg(ev.target.result);
   };
   r.readAsDataURL(f);
 }
@@ -1135,6 +1101,8 @@ function showComboDetail(i){
   if(!r)return;
   var html='<div style="background:#f8f8f8;border-radius:12px;padding:12px;margin-bottom:12px">';
   html+='<div style="font-size:14px;font-weight:700;color:#222;margin-bottom:8px">'+r.n+'</div>';
+  // Image placeholder - will be filled by generateDishImage
+  html+='<div id="dish-img-wrap" style="width:100%;height:180px;background:#eee;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden"><div style="text-align:center;color:#aaa"><div style="font-size:28px;margin-bottom:4px">🎨</div><div style="font-size:12px">Gerando imagem do prato...</div></div></div>';
   if(r.ingredientes&&r.ingredientes.length){
     html+='<div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;margin-bottom:6px">Ingredientes</div>';
     html+=r.ingredientes.map(function(ing){return '<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid #eee">• '+ing+'</div>';}).join("");
@@ -1150,6 +1118,29 @@ function showComboDetail(i){
   document.getElementById("combo-detail").innerHTML=html;
   document.getElementById("combo-detail-area").style.display="block";
   document.getElementById("combo-detail-area").scrollIntoView({behavior:"smooth"});
+  // Generate dish image
+  generateDishImage(r.n);
+}
+
+function generateDishImage(dishName){
+  var wrap=document.getElementById("dish-img-wrap");
+  if(!wrap)return;
+  fetch("/api/imagegen",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({dish:dishName})
+  })
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(data.url){
+      wrap.innerHTML='<img src="'+data.url+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px" alt="'+dishName+'">';
+    } else {
+      wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
+    }
+  })
+  .catch(function(){
+    if(wrap) wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
+  });
 }
 
 function submitSugg(){
