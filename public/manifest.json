@@ -1,0 +1,10 @@
+{
+  "name": "Flavor Fusion",
+  "short_name": "Flavor Fusion",
+  "description": "IA que identifica alimentos e sugere receitas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f5",
+  "theme_color": "#1D9E75",
+  "orientation": "portrait"
+}
