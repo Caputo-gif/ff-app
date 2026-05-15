@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   if (isCombo) {
     // Combo mode - text only, use a reliable text model
-    model = "mistralai/mistral-7b-instruct:free";
+    model = "qwen/qwen-2.5-7b-instruct:free";
     messages = [{
       role: "user",
       content: comboPrompt + " Responda SOMENTE com JSON valido sem markdown. Campos obrigatorios: titulo (string), receitas (array de 3 objetos com n, tipo, tempo, desc, ingredientes array, passos array, dica), nutri (string), harmonizacao (string)."
