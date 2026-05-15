@@ -16,11 +16,18 @@ export default async function handler(req, res) {
   let model, messages;
 
   if (isCombo) {
+    // For text-only combo, use NVIDIA with a fake image to force response
     model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
     const textPrompt = comboPrompt || "Crie 3 receitas combinando ingredientes diversos.";
+    // Send as multimodal with text only (no image) - NVIDIA requires specific format
     messages = [{
       role: "user",
-      content: textPrompt + " Responda SOMENTE com JSON valido sem markdown nem texto extra. Estrutura obrigatoria: {\"titulo\":\"string\",\"receitas\":[{\"n\":\"nome\",\"tipo\":\"tipo\",\"tempo\":\"Xmin\",\"desc\":\"desc\",\"ingredientes\":[\"item1\",\"item2\"],\"passos\":[\"passo1\",\"passo2\"],\"dica\":\"dica\"}],\"nutri\":\"string\",\"harmonizacao\":\"string\"}"
+      content: [
+        { 
+          type: "text", 
+          text: textPrompt + " Responda SOMENTE com JSON valido sem markdown nem texto extra. Estrutura: {"titulo":"string","receitas":[{"n":"nome","tipo":"tipo","tempo":"Xmin","desc":"desc","ingredientes":["item1","item2"],"passos":["passo1","passo2"],"dica":"dica"}],"nutri":"string","harmonizacao":"string"}"
+        }
+      ]
     }];
   } else {
     if (!imageData || !mediaType) {
