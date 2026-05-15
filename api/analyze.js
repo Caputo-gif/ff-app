@@ -32,6 +32,9 @@ export default async function handler(req, res) {
     }];
   }
 
+  console.log("Mode:", isCombo ? "combo" : "image", "Model:", model);
+  console.log("Messages type:", isCombo ? "text" : "image+text");
+
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -50,8 +53,8 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("OpenRouter error:", err);
-      return res.status(502).json({ error: "Erro ao conectar com a IA." });
+      console.error("OpenRouter error status:", response.status, "body:", err);
+      return res.status(502).json({ error: "Erro ao conectar: " + response.status });
     }
 
     const data = await response.json();
