@@ -6,19 +6,22 @@ export default async function handler(req, res) {
   const apiKey = process.env.OPENROUTER_KEY;
   if (!apiKey) return res.status(500).json({ error: "Chave de API não configurada." });
 
-  let messages;
+  let model, messages;
 
   if (isCombo) {
-    // Combo mode - text only
+    // Combo mode - text only, use a reliable text model
+    model = "mistralai/mistral-7b-instruct:free";
     messages = [{
       role: "user",
-      content: comboPrompt + " Responda SOMENTE com JSON valido sem markdown. Campos obrigatorios: titulo, receitas (array de 3 com n/tipo/tempo/desc), nutri (string), harmonizacao (string)."
+      content: comboPrompt + " Responda SOMENTE com JSON valido sem markdown. Campos obrigatorios: titulo (string), receitas (array de 3 objetos com n, tipo, tempo, desc, ingredientes array, passos array, dica), nutri (string), harmonizacao (string)."
     }];
   } else {
+    // Image analysis mode
     if (!imageData || !mediaType) return res.status(400).json({ error: "Imagem obrigatória." });
 
+    model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
     const locationInfo = locationCtx || "Use precos medios do Brasil.";
-    const prompt = "Voce e um chef especialista em culinaria brasileira. Identifique o alimento na imagem. Nivel do usuario: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos obrigatorios: nome, emoji, categoria, confianca (Alta|Media|Baixa), tags (array 3), desc (2 frases), grid (array 4 pares [[chave,valor]]), preco ({valor,referencia,dica,melhorEpoca}), nutri (array 4 pares [[nutriente,numero]]), curiosidades (array 3), tecnicas (array 3 strings), receitas (array 3 com {n,tipo,tempo}), receita_detalhada ({n,tempo,rend,ing,steps,tip,emplatamento}).";
+    const prompt = "Voce e um chef especialista em culinaria brasileira. Identifique o alimento na imagem. Nivel do usuario: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos: nome, emoji, categoria, confianca (Alta|Media|Baixa), tags (array 3), desc (2 frases), grid (array 4 pares [[chave,valor]]), preco ({valor,referencia,dica,melhorEpoca}), nutri (array 4 pares [[nutriente,numero]]), curiosidades (array 3), tecnicas (array 3), receitas (array 3 com {n,tipo,tempo}), receita_detalhada ({n,tempo,rend,ing,steps,tip,emplatamento}).";
 
     messages = [{
       role: "user",
@@ -39,7 +42,7 @@ export default async function handler(req, res) {
         "X-Title": "Flavor Fusion"
       },
       body: JSON.stringify({
-        model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        model: model,
         max_tokens: 3000,
         messages: messages
       })
@@ -54,25 +57,28 @@ export default async function handler(req, res) {
     const data = await response.json();
     if (data.error) return res.status(500).json({ error: data.error.message || "Erro da IA" });
 
-    let text = data.choices[0].message.content || "";
-    // Clean markdown fences and thinking tags
-    text = text.replace(/<think>[\s\S]*?<\/think>/g, "");
+    let text = (data.choices[0].message.content || "").trim();
+    // Remove thinking tags from reasoning models
+    text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+    // Remove markdown fences
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
     // Extract JSON object
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.status(500).json({ error: "Resposta da IA invalida: " + text.slice(0,100) });
+    if (!jsonMatch) {
+      console.error("No JSON found in:", text.slice(0, 200));
+      return res.status(500).json({ error: "Resposta da IA inválida. Tente novamente." });
+    }
     let jsonStr = jsonMatch[0];
-    // Fix common JSON issues from AI models
-    // Replace single quotes used as string delimiters (carefully)
     // Fix unquoted keys
     jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
     // Fix trailing commas
     jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+
     try {
       return res.status(200).json(JSON.parse(jsonStr));
     } catch(parseErr) {
-      console.error("JSON parse error:", parseErr.message, "\nRaw:", jsonStr.slice(0,300));
-      return res.status(500).json({ error: "Erro ao interpretar resposta da IA. Tente novamente." });
+      console.error("Parse error:", parseErr.message, "Raw:", jsonStr.slice(0, 300));
+      return res.status(500).json({ error: "Erro ao interpretar resposta. Tente novamente." });
     }
   } catch (err) {
     console.error("Handler error:", err);
