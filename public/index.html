@@ -1063,6 +1063,19 @@ function submitSugg(){
   document.getElementById("sugg-done").classList.remove("hidden");
   setTimeout(function(){document.getElementById("sugg-done").classList.add("hidden");},3000);
 }
+
+// ── AUTO INIT — show cadastro or geo on first load ──
+(function(){
+  var user=localStorage.getItem("cn_user");
+  var parsed=user?JSON.parse(user):null;
+  if(!parsed||!parsed.tel){
+    // Show cadastro over profile screen
+    document.getElementById("cadastro-screen").classList.remove("hidden");
+  } else if(!localStorage.getItem("cn_geo_answered")){
+    // Show geo permission
+    document.getElementById("geo-screen").classList.remove("hidden");
+  }
+})();
 </script>
 </body>
 </html>
