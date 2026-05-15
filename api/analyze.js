@@ -1,48 +1,23 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  let body;
-  try {
-    body = req.body;
-  } catch(e) {
-    return res.status(400).json({ error: "Body inválido: " + e.message });
-  }
-
-  const { imageData, mediaType, profile, locationCtx, comboPrompt, isCombo } = body || {};
+  const { imageData, mediaType, profile, locationCtx, comboPrompt, isCombo } = req.body || {};
 
   const apiKey = process.env.OPENROUTER_KEY;
-  if (!apiKey) return res.status(500).json({ error: "OPENROUTER_KEY não configurada no servidor." });
+  if (!apiKey) return res.status(500).json({ error: "Chave nao configurada." });
 
-  let model, messages;
+  const model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
+  let messages;
 
   if (isCombo) {
-    // For text-only combo, use NVIDIA with a fake image to force response
-    model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
-    const textPrompt = comboPrompt || "Crie 3 receitas combinando ingredientes diversos.";
-    // Send as multimodal with text only (no image) - NVIDIA requires specific format
-    messages = [{
-      role: "user",
-      content: [
-        { 
-          type: "text", 
-          text: textPrompt + " Responda SOMENTE com JSON valido sem markdown nem texto extra. Estrutura: {"titulo":"string","receitas":[{"n":"nome","tipo":"tipo","tempo":"Xmin","desc":"desc","ingredientes":["item1","item2"],"passos":["passo1","passo2"],"dica":"dica"}],"nutri":"string","harmonizacao":"string"}"
-        }
-      ]
-    }];
+    const jsonTemplate = '{"titulo":"string","receitas":[{"n":"nome","tipo":"tipo","tempo":"Xmin","desc":"desc","ingredientes":["item1","item2"],"passos":["passo1","passo2"],"dica":"dica"}],"nutri":"string","harmonizacao":"string"}';
+    const fullPrompt = (comboPrompt || "Crie 3 receitas.") + " Responda SOMENTE com JSON valido sem markdown. Estrutura: " + jsonTemplate;
+    messages = [{ role: "user", content: [{ type: "text", text: fullPrompt }] }];
   } else {
-    if (!imageData || !mediaType) {
-      return res.status(400).json({ error: "imageData e mediaType são obrigatórios para análise de foto." });
-    }
-    model = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
+    if (!imageData || !mediaType) return res.status(400).json({ error: "Imagem obrigatoria." });
     const locationInfo = locationCtx || "Use precos medios do Brasil.";
-    const prompt = "Voce e um chef especialista em culinaria brasileira. Identifique o alimento na imagem. Nivel: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos: nome, emoji, categoria, confianca (Alta|Media|Baixa), tags (array 3), desc (2 frases), grid (array 4 pares [[chave,valor]]), preco ({valor,referencia,dica,melhorEpoca}), nutri (array 4 pares [[nutriente,numero]]), curiosidades (array 3), tecnicas (array 3), receitas (array 3 com {n,tipo,tempo}), receita_detalhada ({n,tempo,rend,ing,steps,tip,emplatamento}).";
-    messages = [{
-      role: "user",
-      content: [
-        { type: "image_url", image_url: { url: "data:" + mediaType + ";base64," + imageData } },
-        { type: "text", text: prompt }
-      ]
-    }];
+    const prompt = "Voce e um chef especialista. Identifique o alimento na imagem. Nivel: " + (profile || "iniciante") + ". " + locationInfo + " Responda SOMENTE com JSON valido sem markdown. Campos: nome, emoji, categoria, confianca, tags, desc, grid, preco, nutri, curiosidades, tecnicas, receitas, receita_detalhada.";
+    messages = [{ role: "user", content: [{ type: "image_url", image_url: { url: "data:" + mediaType + ";base64," + imageData } }, { type: "text", text: prompt }] }];
   }
 
   try {
@@ -54,62 +29,33 @@ export default async function handler(req, res) {
         "HTTP-Referer": "https://ff-app-cjw9.vercel.app",
         "X-Title": "Flavor Fusion"
       },
-      body: JSON.stringify({
-        model: model,
-        max_tokens: 3000,
-        messages: messages
-      })
+      body: JSON.stringify({ model, max_tokens: 3000, messages })
     });
 
     const responseText = await response.text();
-
-    if (!response.ok) {
-      console.error("OpenRouter error:", response.status, responseText.slice(0, 300));
-      return res.status(502).json({ error: "Erro OpenRouter " + response.status + ": " + responseText.slice(0, 100) });
-    }
+    if (!response.ok) return res.status(502).json({ error: "Erro OpenRouter " + response.status });
 
     let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch(e) {
-      return res.status(500).json({ error: "Resposta não é JSON: " + responseText.slice(0, 100) });
-    }
+    try { data = JSON.parse(responseText); } catch(e) { return res.status(500).json({ error: "Resposta invalida da API" }); }
 
-    if (data.error) {
-      return res.status(500).json({ error: "Erro da IA: " + (data.error.message || JSON.stringify(data.error)) });
-    }
+    if (data.error) return res.status(500).json({ error: data.error.message || "Erro da IA" });
 
     let text = (data.choices?.[0]?.message?.content || "").trim();
     text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return res.status(500).json({ error: "JSON não encontrado. Resposta: " + text.slice(0, 150) });
-    }
+    if (!jsonMatch) return res.status(500).json({ error: "JSON nao encontrado. Resposta: " + text.slice(0, 100) });
 
     let jsonStr = jsonMatch[0];
-
-    // Fix unquoted keys: {titulo: -> {"titulo":
-    jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_áéíóúàâêôãõüçÁÉÍÓÚÀÂÊÔÃÕÜÇ][a-zA-Z0-9_áéíóúàâêôãõüçÁÉÍÓÚÀÂÊÔÃÕÜÇ\s]*)\s*:/g, function(m, pre, key) {
-      return pre + '"' + key.trim() + '":';
-    });
-    // Fix trailing commas
-    jsonStr = jsonStr.replace(/,([\s\n]*[}\]])/g, '$1');
-    // Fix single quotes used as string delimiters
-    jsonStr = jsonStr.replace(/:\s*'([^']*)'/g, ':"$1"');
+    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, "$1");
 
     try {
       return res.status(200).json(JSON.parse(jsonStr));
-    } catch(parseErr) {
-      // Last resort: try to extract partial valid JSON
-      console.error("Parse error:", parseErr.message);
-      console.error("JSON attempt:", jsonStr.slice(0, 500));
+    } catch(e) {
       return res.status(500).json({ error: "Erro ao interpretar resposta. Tente novamente." });
     }
-
   } catch (err) {
-    console.error("Handler error:", err);
     return res.status(500).json({ error: "Erro interno: " + err.message });
   }
 }
