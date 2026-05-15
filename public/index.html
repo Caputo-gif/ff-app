@@ -688,12 +688,15 @@ function setStatus(txt,state){
 }
 
 function switchTab(t){
-  var tabs=["camera","library","shop"];
+  var tabs=["camera","library","combo","shop"];
   tabs.forEach(function(tab,i){
-    document.getElementById("tab-"+tab).classList.toggle("hidden",tab!==t);
-    document.querySelectorAll(".main-tab")[i].classList.toggle("active",tab===t);
+    var el=document.getElementById("tab-"+tab);
+    if(el) el.classList.toggle("hidden",tab!==t);
+    var tabEl=document.querySelectorAll(".main-tab")[i];
+    if(tabEl) tabEl.classList.toggle("active",tab===t);
   });
   if(t==="library") renderLib();
+  if(t==="combo"){renderComboGrid();updateComboSelected();}
 }
 
 function toggleCam(){
