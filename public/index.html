@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1D9E75">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chef Nicolas">
 <link rel="manifest" href="/manifest.json">
@@ -212,8 +213,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .combo-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:#1D9E75;color:#fff;font-size:12px;font-weight:700}
 .combo-chip-rm{background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:0;line-height:1}
 .combo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
-.combo-fc{background:#fff;border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;border:2px solid #eee;transition:all .15s}
+.combo-fc{background:#fff;border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;border:2px solid #eee;transition:all .15s;position:relative}
 .combo-fc.picked{border-color:#1D9E75;background:#E1F5EE}
+.combo-fc.recommended{border-color:#9FE1CB}
+.combo-fc.recommended::after{content:"★";position:absolute;top:3px;right:3px;background:#1D9E75;color:#fff;font-size:8px;font-weight:700;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;line-height:15px}
 .combo-fc-em{font-size:24px;margin-bottom:3px}
 .combo-fc-nm{font-size:11px;font-weight:700;color:#222}
 .btn-combo{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:1rem}
@@ -225,6 +228,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .combo-rec{background:#f8f8f8;border-radius:10px;padding:10px;margin-bottom:8px}
 .combo-rec-name{font-size:13px;font-weight:700;color:#222}
 .combo-rec-meta{font-size:11px;color:#888;margin-top:3px}
+
+/* ── OBJETIVO ── */
+.objetivo-selector{display:flex;gap:8px;margin-bottom:.75rem}
+.obj-btn{flex:1;padding:10px 4px;border-radius:12px;border:2px solid #eee;background:#fff;cursor:pointer;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.obj-btn.active{border-color:#1D9E75;background:#f0fdf8}
+.obj-btn-icon{font-size:22px}
+.obj-btn-name{font-size:10px;font-weight:700;color:#666;line-height:1.2}
+.obj-btn.active .obj-btn-name{color:#0F6E56}
+.obj-tip{background:#f0fdf8;border-radius:10px;padding:10px 12px;margin-bottom:.75rem;font-size:12px;color:#0F6E56;line-height:1.5;border:1px solid #9FE1CB}
 </style>
 </head>
 <body>
@@ -292,10 +304,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 
 <!-- ── TIP FAB ── -->
 <button class="tip-fab hidden" id="tip-fab" onclick="openTip()" title="Apoiar o Flavor Fusion">💚</button>
-
-
-
-
 
 <div id="screen-profile">
   <div class="profile-screen">
@@ -426,14 +434,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     <!-- ── COMBINADOR TAB ── -->
     <div id="tab-combo" class="hidden">
       <div class="combo-section">
-        <div style="font-size:13px;color:#666;margin-bottom:.75rem;line-height:1.5">Selecione 2 ou mais alimentos para descobrir receitas, harmonizações e informações nutricionais combinadas.</div>
+        <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:.5rem">🎯 Qual seu objetivo?</div>
+        <div class="objetivo-selector">
+          <div class="obj-btn active" id="obj-geral" onclick="selectObjetivo('geral')">
+            <span class="obj-btn-icon">🍽️</span>
+            <span class="obj-btn-name">Cotidiano</span>
+          </div>
+          <div class="obj-btn" id="obj-emagrecer" onclick="selectObjetivo('emagrecer')">
+            <span class="obj-btn-icon">🥗</span>
+            <span class="obj-btn-name">Emagrecer</span>
+          </div>
+          <div class="obj-btn" id="obj-massa" onclick="selectObjetivo('massa')">
+            <span class="obj-btn-icon">💪</span>
+            <span class="obj-btn-name">Ganhar massa</span>
+          </div>
+        </div>
+        <div class="obj-tip" id="obj-tip">🍽️ <strong>Cotidiano:</strong> Receitas práticas, saborosas e sem restrições — para o dia a dia.</div>
         <input class="combo-search" id="combo-srch" placeholder="🔍 Buscar alimento..." oninput="renderComboGrid()">
         <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Selecionados</div>
         <div class="combo-selected" id="combo-selected">
           <div style="font-size:12px;color:#aaa;padding:8px 0">Nenhum alimento selecionado ainda</div>
         </div>
         <button class="btn-combo" id="btn-combo" onclick="generateCombo()" disabled>🔀 Gerar receitas combinadas</button>
-        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Escolha os alimentos</div>
+        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">
+          Escolha os alimentos
+          <span id="combo-rec-label" style="color:#1D9E75;font-weight:700;font-size:10px;margin-left:6px">★ = recomendados</span>
+        </div>
         <div class="combo-grid" id="combo-grid"></div>
         <div id="combo-result-area" style="display:none">
           <div class="combo-result">
@@ -501,35 +527,20 @@ const FOODS={
   batata:{emoji:"🥔",name:"Batata",cat:"Carboidrato",tags:["Universal","Versátil","Comfort food"],desc:"O tubérculo mais versátil do mundo. 4000 mais variedades.",grid:[["Variedades","4000 mais no mundo"],["Para fritar","Alta amido"],["Para salada","Monalisa"],["Origem","Andes peruanos"]],nutri:[["Potássio","85"],["Vitamina C","60"],["Carboidratos","88"],["Calorias","média"]],curio:["Primeiro vegetal cultivado no espaço!","Existem batatas roxas, azuis e pretas.","A Irlanda perdeu 1 milhão na Grande Fome de 1845."],tecnicas:["Dupla fritura: 150 depois 180 graus","Purê: espremedor mais manteiga fria mais leite quente","Fondant: assar em caldo após selar"],receitas:[{n:"Batata Cozida com Azeite",tipo:"Simples",tempo:"20min"},{n:"Batata Frita Crocante",tipo:"Petisco",tempo:"30min"},{n:"Purê Cremoso Gourmet",tipo:"Acompanhamento",tempo:"30min"}],rd:{n:"Purê Cremoso Gourmet",tempo:"30min",rend:"6 porções",ing:["1kg batata asterix","100g manteiga gelada","200ml leite quente","Sal","Pimenta branca","Noz-moscada"],steps:["Cozinhe com casca em água salgada.","Descasque ainda quentes.","Espremedor — NUNCA liquidificador.","Manteiga gelada aos poucos mexendo.","Leite quente aos poucos.","Ajuste sal, pimenta, noz-moscada."],tip:"Liquidificador vira cola! Espremedor é obrigatório.",plate:"Quenelle dupla, jus réduit, ciboulette e manteiga clarificada."},preco:{valor:"R$ 3–6/kg",referencia:"Brasil",dica:"Asterix para fritar; monalisa para cozido",melhorEpoca:"ano todo"}},
   queijo:{emoji:"🧀",name:"Queijo",cat:"Laticínio",tags:["MG lidera","Diversidade","Gourmet"],desc:"Brasil produz 1000 mais tipos. MG é a capital do queijo artesanal.",grid:[["Capital","Minas Gerais"],["Tipos","1000 mais variedades"],["Destaque","Canastra, coalho, brie"],["Uso","Tábuas, risotos, gratinados"]],nutri:[["Proteína","88"],["Cálcio","95"],["Vitamina B12","75"],["Calorias","alta"]],curio:["O Canastra tem denominação de origem como o champanhe!","O coalho é o único que pode ser grelhado sem derreter.","Brasil ganhou medalhas superando França e Itália."],tecnicas:["Temperatura ambiente: 30min antes","Fonduta: banho-maria com amido","Gratinado: grill 250 graus"],receitas:[{n:"Queijo Coalho Grelhado",tipo:"Petisco",tempo:"10min"},{n:"Fondue de Queijo",tipo:"Compartilhado",tempo:"25min"},{n:"Tábua Gourmet",tipo:"Entrada",tempo:"15min"}],rd:{n:"Queijo Coalho Grelhado",tempo:"10min",rend:"4 porções",ing:["400g queijo coalho em fatias","Mel de qualidade","Orégano fresco","Pimenta rosa"],steps:["Frigideira seca em fogo alto sem azeite.","Fatias de queijo. Não mexa.","2 a 3min até crosta dourada.","Vire com espátula.","Sirva com fio de mel."],tip:"Só o coalho aguenta grelhar sem derreter!",plate:"Fatia inclinada em ardósia, mel trufado, nozes caramelizadas, flores comestíveis."},preco:{valor:"R$ 35–90/kg",referencia:"Litoral SP",dica:"Coalho em torno de R$35/kg; Canastra artesanal R$80 a 120/kg",melhorEpoca:"ano todo"}},
   brocolis:{emoji:"🥦",name:"Brócolis",cat:"Vegetal",tags:["Crucífero","Saúde","Versátil"],desc:"Rico em sulforafano anti-inflamatório. Melhor al dente — nunca cozinhe demais!",grid:[["Origem","Mediterrâneo"],["Colheita","Abr a Jun e Ago a Out"],["Parte","Florete e talo"],["Cozimento","Al dente 3min máx"]],nutri:[["Vitamina C","92"],["Vitamina K","88"],["Sulforafano","95"],["Calorias","muito baixa"]],curio:["O talo tem mais nutrientes que os floretes!","Cozinhar demais destrói 50 por cento das vitaminas.","Levado ao mundo por imigrantes italianos."],tecnicas:["Branqueamento: 2min mais gelo para verde vibrante","Assar 220 graus: crocante e caramelizado","Crema: bater cozido com azeite e alho"],receitas:[{n:"Brócolis no Vapor",tipo:"Simples",tempo:"10min"},{n:"Brócolis Assado com Parmesão",tipo:"Petisco",tempo:"20min"},{n:"Velouté de Brócolis",tipo:"Gourmet",tempo:"30min"}],rd:{n:"Brócolis Assado com Parmesão",tempo:"20min",rend:"4 porções",ing:["1 cabeça brócolis","4 col sopa azeite","3 dentes alho fatiados","50g parmesão","Sal e pimenta calabresa","Limão"],steps:["Forno 220 graus pré-aquecido.","Floretes em CAMADA ÚNICA.","Azeite, alho, sal e pimenta.","15 a 18min até caramelizar.","Parmesão mais 3min.","Finalizar com limão."],tip:"Camada única é lei — empilhado vira vapor e fica mole!",plate:"Floretes em altura, telha de parmesão, espuma de alho negro e óleo de avelã."},preco:{valor:"R$ 5–10/unidade",referencia:"Litoral SP",dica:"Miolo verde fechado significa fresco. Aberto significa velho.",melhorEpoca:"abr a jun e ago a out"}},
-
-  // NOVOS ALIMENTOS
-  tomate:{emoji:"🍅",name:"Tomate",cat:"Vegetal",tags:["Nacional","Versátil","Base de molhos"],desc:"O mais usado na culinária brasileira. O tomate italiano é ideal para molhos; o caqui para saladas; o cereja para petiscos.",grid:[["Região","SP e MG lideram"],["Colheita","Ano todo"],["Tipos","Italiano, caqui, cereja"],["Uso","Molhos, saladas, assado"]],nutri:[["Licopeno","95"],["Vitamina C","70"],["Potássio","60"],["Calorias","muito baixa"]],curio:["O tomate é botanicamente uma fruta mas culinariamente um legume.","O licopeno fica mais disponível quando o tomate é cozido.","O Brasil é o 9º maior produtor mundial de tomate."],tecnicas:["Concassé: pelar, dessemar e cortar em cubos","Confit: assar lentamente com azeite e alho","Redução: cozinhar para concentrar o sabor"],receitas:[{n:"Molho de Tomate Caseiro",tipo:"Molho",tempo:"30min"},{n:"Bruschetta de Tomate",tipo:"Entrada",tempo:"15min"},{n:"Tomate Recheado ao Forno",tipo:"Prato",tempo:"40min"}],rd:{n:"Molho de Tomate Caseiro",tempo:"30min",rend:"6 porções",ing:["1kg tomate italiano maduro","4 dentes alho","1 cebola","Azeite","Manjericão fresco","Sal, açúcar e pimenta"],steps:["Refogue cebola e alho no azeite.","Adicione tomates picados sem sementes.","Cozinhe 20min em fogo médio mexendo sempre.","Tempere com sal, pitada de açúcar e pimenta.","Finalize com manjericão fresco."],tip:"A pitada de açúcar equilibra a acidez — segredo dos molhos italianos!",plate:"simples"},preco:{valor:"R$ 4–8/kg",referencia:"Brasil",dica:"Tomate italiano é mais barato e ideal para molhos",melhorEpoca:"fev–jun"}},
-
-  alho:{emoji:"🧄",name:"Alho",cat:"Tempero",tags:["Universal","Tempero base","Saúde"],desc:"Base de quase toda a culinária brasileira. O alho nacional tem sabor mais intenso que o importado. Dourar no azeite libera compostos aromáticos únicos.",grid:[["Região","Curitibanos–SC lidera"],["Colheita","Nov–Jan"],["Uso","Base de refogados"],["Tipos","Nacional e importado (China)"]],nutri:[["Alicina","100"],["Vitamina B6","75"],["Manganês","65"],["Calorias","muito baixa"]],curio:["O Brasil importa 90 por cento do alho consumido da China.","A alicina — composto do alho — é destruída pelo calor excessivo.","Alho roxo nacional tem sabor muito mais intenso que o branco importado."],tecnicas:["Laminar: fatias finas para dourar","Brunoise: cubinhos para refogar","Confitar: cozinhar em azeite baixo para sabor suave"],receitas:[{n:"Alho ao Azeite para Pão",tipo:"Petisco",tempo:"20min"},{n:"Frango ao Alho e Limão",tipo:"Prato",tempo:"40min"},{n:"Pasta de Alho Confit",tipo:"Entrada gourmet",tempo:"1h"}],rd:{n:"Pasta de Alho Confit",tempo:"1h",rend:"1 pote",ing:["2 cabeças de alho inteiras","200ml azeite extra virgem","Alecrim e tomilho","Sal e pimenta"],steps:["Corte o topo das cabeças de alho para expor os dentes.","Coloque numa assadeira pequena, regue com azeite.","Adicione ervas, sal e pimenta.","Cubra com alumínio e asse a 160 graus por 50min.","Esprema os dentes — viraram pasta cremosa.","Guarde na geladeira coberto com azeite."],tip:"O alho confit dura 2 semanas na geladeira e transforma qualquer prato!",plate:"simples"},preco:{valor:"R$ 20–35/kg",referencia:"Brasil",dica:"Alho roxo nacional tem mais sabor — vale o preço maior",melhorEpoca:"dez–mar"}},
-
-  limao:{emoji:"🍋",name:"Limão Tahiti",cat:"Citrus",tags:["Nacional","Acidez","1º do mundo"],desc:"O Brasil é o maior produtor mundial de limão tahiti. Tecnicamente uma lima ácida, conquistou a culinária nacional. SP e MG são os grandes produtores.",grid:[["Região","SP e MG"],["Colheita","Ano todo"],["Tipo real","Lima ácida"],["Produção","1º do mundo"]],nutri:[["Vitamina C","80"],["Flavonoides","70"],["Ácido cítrico","100"],["Calorias","muito baixa"]],curio:["O limão tahiti não é um limão verdadeiro — é uma lima ácida!","A casca tem 5 vezes mais sabor que o suco.","O Brasil é o maior produtor mundial de limão tahiti."],tecnicas:["Zest: raspar a casca para aromas intensos","Cura: suco de limão cozinha proteínas como peixe","Limonada suíça: bater o limão inteiro para usar a casca"],receitas:[{n:"Limonada Suíça",tipo:"Bebida",tempo:"10min"},{n:"Ceviche de Tilápia",tipo:"Entrada",tempo:"25min"},{n:"Torta de Limão",tipo:"Sobremesa",tempo:"1h"}],rd:{n:"Limonada Suíça",tempo:"10min",rend:"4 porções",ing:["4 limões tahiti grandes","1 lata leite condensado","500ml água gelada","200ml creme de leite","Gelo e hortelã"],steps:["Lave muito bem os limões — a casca entra na receita!","Corte em quartos e bata no liquidificador com água por apenas 10 segundos.","Coe rapidamente em peneira grossa.","Bata novamente com leite condensado e creme de leite.","Sirva com muito gelo e hortelã."],tip:"Bata rápido — bater demais amarga pela casca. O segredo é a casca que entra!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Litoral SP",dica:"Em Ubatuba encontra limão fresco barato nas feiras",melhorEpoca:"ano todo"}},
-
-  cebola:{emoji:"🧅",name:"Cebola",cat:"Tempero",tags:["Universal","Base de refogados","Nacional"],desc:"Junto com o alho, é a base de quase toda a culinária mundial. A roxa é mais suave e ideal crua; a branca tem sabor mais forte; a caipira tem sabor intenso.",grid:[["Região","SP, MG, RS"],["Colheita","Jun–Set"],["Tipos","Branca, roxa, caipira"],["Uso","Base de todo refogado"]],nutri:[["Quercetina","88"],["Vitamina C","55"],["Fibras","50"],["Calorias","muito baixa"]],curio:["A cebola faz chorar por causa do sulfóxido de alquila que irrita os olhos.","Para não chorar: refrigere antes de cortar ou corte embaixo d'água.","A cebola caramelizada leva de 45min a 1h para ficar pronta de verdade."],tecnicas:["Brunoise: cubinhos finos para refogar","Julienne: tiras para saladas e caramelizar","Caramelizar: fogo baixo, paciência de 45min mínimo"],receitas:[{n:"Cebola Caramelizada",tipo:"Acompanhamento",tempo:"50min"},{n:"Sopa de Cebola Francesa",tipo:"Entrada quente",tempo:"1h"},{n:"Vinagrete de Cebola Roxa",tipo:"Condimento",tempo:"10min"}],rd:{n:"Sopa de Cebola Francesa",tempo:"1h",rend:"4 porções",ing:["6 cebolas grandes fatiadas","50g manteiga","200ml vinho branco seco","1L caldo de carne ou legumes","4 fatias pão rústico","100g gruyère ou parmesão","Sal, pimenta e tomilho"],steps:["Caramelize as cebolas na manteiga por 45min em fogo baixo — mexendo sempre.","Adicione o vinho e deixe evaporar.","Adicione o caldo e cozinhe mais 15min.","Tempere com sal, pimenta e tomilho.","Sirva em tigelas, coloque pão por cima e cubra com queijo.","Gratine no forno a 220 graus por 10min."],tip:"A caramelização verdadeira leva tempo — não tente acelerar com fogo alto!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Brasil",dica:"Cebola roxa é mais cara mas mais versátil — vale para saladas e pratos crus",melhorEpoca:"jun–set"}},
-
-  cenoura:{emoji:"🥕",name:"Cenoura",cat:"Vegetal",tags:["Nacional","Versátil","Doce natural"],desc:"Uma das hortaliças mais consumidas do Brasil. Rica em betacaroteno que o corpo converte em vitamina A. Versátil — do bolo ao purê, da sopa ao escabeche.",grid:[["Região","MG, SP, PR"],["Colheita","Ano todo"],["Cor","Beta-caroteno"],["Uso","Crua, cozida, assada, bolo"]],nutri:[["Betacaroteno","100"],["Vitamina A","95"],["Fibras","60"],["Calorias","baixa"]],curio:["A cenoura original era roxa — a laranja foi desenvolvida pelos holandeses.","Cozinhar aumenta a disponibilidade do betacaroteno em até 40 por cento.","A casca tem mais nutrientes que o interior — pode deixar."],tecnicas:["Glacear: cozinhar com manteiga e açúcar para brilho","Brunoise: cubinhos para sopas e refogados","Assar inteira: concentra o sabor naturalmente"],receitas:[{n:"Bolo de Cenoura com Cobertura de Chocolate",tipo:"Sobremesa",tempo:"50min"},{n:"Cenoura Glaceada",tipo:"Acompanhamento",tempo:"20min"},{n:"Sopa Cremosa de Cenoura",tipo:"Entrada",tempo:"30min"}],rd:{n:"Bolo de Cenoura com Cobertura de Chocolate",tempo:"50min",rend:"10 fatias",ing:["3 cenouras médias","3 ovos","1 xícara óleo","2 xícaras açúcar","2 xícaras farinha de trigo","1 col sopa fermento","Pitada de sal","Para cobertura: 200g chocolate, 100ml creme de leite"],steps:["Bata no liquidificador as cenouras, ovos e óleo até homogêneo.","Adicione açúcar e bata mais.","Misture farinha, fermento e sal na mão — não bata demais.","Despeje em forma untada e asse a 180 graus por 35min.","Derreta o chocolate com o creme de leite para a cobertura.","Despeje a cobertura quente sobre o bolo frio."],tip:"Não abra o forno antes de 30min — o bolo pode solar! Teste com palito.",plate:"simples"},preco:{valor:"R$ 3–5/kg",referencia:"Brasil",dica:"Cenoura com folha é mais fresca — as folhas murcham primeiro",melhorEpoca:"ano todo"}},
-
-  batata_doce:{emoji:"🍠",name:"Batata-doce",cat:"Carboidrato",tags:["Fitness","Nacional","Versátil"],desc:"Queridinha dos atletas e da culinária saudável. A variedade roxa tem antocianinas poderosas. Baixo índice glicêmico quando cozida com casca.",grid:[["Região","Todo o Brasil"],["Colheita","Ago–Dez"],["Variedades","Branca, laranja, roxa"],["Benefício","Índice glicêmico baixo"]],nutri:[["Betacaroteno","95"],["Vitamina A","90"],["Fibras","65"],["Calorias","média"]],curio:["A batata-doce roxa tem antocianinas — o mesmo pigmento do vinho tinto.","É usada por astronautas da NASA em missões espaciais longas.","Na Okinawa é base da dieta dos centenários."],tecnicas:["Assar com casca: preserva nutrientes e adoça naturalmente","Purê: textura mais cremosa que a batata comum","Chips: fatias finas no forno com azeite ficam crocantes"],receitas:[{n:"Batata-doce Assada com Mel",tipo:"Acompanhamento",tempo:"40min"},{n:"Purê de Batata-doce",tipo:"Acompanhamento",tempo:"30min"},{n:"Chips de Batata-doce no Forno",tipo:"Petisco saudável",tempo:"35min"}],rd:{n:"Chips de Batata-doce no Forno",tempo:"35min",rend:"4 porções",ing:["2 batatas-doces grandes","3 col sopa azeite","Sal grosso","Páprica defumada","Alecrim seco","Pimenta do reino"],steps:["Pré-aqueça o forno a 200 graus.","Fatie as batatas-doces bem finas — use mandoline se tiver.","Misture com azeite e temperos.","Espalhe em camada única em assadeira forrada com papel manteiga.","Asse 20min, vire e asse mais 10 a 15min até crocante.","Fique de olho — queimam rápido no final!"],tip:"Quanto mais finas as fatias, mais crocante fica. Mandoline é o segredo!",plate:"simples"},preco:{valor:"R$ 4–7/kg",referencia:"Brasil",dica:"Compre a roxa para mais antioxidantes e cor bonita nos pratos",melhorEpoca:"ago–dez"}},
-
-  ovo:{emoji:"🥚",name:"Ovo",cat:"Proteína",tags:["Universal","Proteína completa","Versátil"],desc:"Um dos ingredientes mais versáteis da culinária. Proteína completa com todos os aminoácidos essenciais. Do café ao jantar, o ovo aparece em todas as refeições.",grid:[["Produção","Brasil 3º do mundo"],["Tipos","Branco, caipira, orgânico"],["Proteína","Completa — todos aminoácidos"],["Uso","Do café à sobremesa"]],nutri:[["Proteína completa","98"],["Colina","85"],["Vitamina D","70"],["Calorias","média"]],curio:["O ovo caipira tem gema mais laranja por causa da alimentação da galinha.","Para saber se o ovo está fresco: mergulhe em água — se afunda, é fresco.","A clara tem a mesma proteína que a gema — só tem menos gordura."],tecnicas:["Pochê: cozinhar sem casca em água com vinagre","Beneditino: pochê sobre pão com hollandaise","Merengar: bater clara até picos firmes para sobremesas"],receitas:[{n:"Ovo Mexido Cremoso",tipo:"Café da manhã",tempo:"5min"},{n:"Ovo Pochê com Torrada",tipo:"Brunch",tempo:"10min"},{n:"Omelete de Ervas Finas",tipo:"Refeição leve",tempo:"10min"}],rd:{n:"Ovo Mexido Cremoso",tempo:"5min",rend:"1 porção",ing:["3 ovos","1 col sopa manteiga","Sal e pimenta","Cebolinha picada","Creme de leite opcional"],steps:["Bata os ovos levemente — não em excesso.","Coloque manteiga em frigideira em fogo MUITO baixo.","Adicione os ovos e mexa lentamente com espátula.","Retire do fogo antes de parecer pronto — o calor residual termina.","Tempere e sirva imediatamente com cebolinha."],tip:"O segredo é fogo baixo e retirar antes de estar pronto — ovos mexidos cremosos não esperam!",plate:"simples"},preco:{valor:"R$ 12–25/dúzia",referencia:"Brasil",dica:"Ovo caipira tem mais sabor e gema mais alaranjada",melhorEpoca:"ano todo"}},
-
-  leite:{emoji:"🥛",name:"Leite",cat:"Laticínio",tags:["Nacional","Base de molhos","Versátil"],desc:"Base de inúmeras preparações. O leite integral tem mais gordura e sabor. O Brasil é o 3º maior produtor mundial. MG é o estado mais produtor.",grid:[["Região","MG, SP, RS"],["Tipos","Integral, semi, desnatado"],["Produção","3º do mundo"],["Uso","Molhos, sobremesas, bebidas"]],nutri:[["Cálcio","95"],["Proteína","75"],["Vitamina D","70"],["Calorias","média"]],curio:["O Brasil é o 3º maior produtor de leite do mundo.","Leite integral tem mais vitaminas lipossolúveis A, D, E e K.","A lactose é o açúcar natural do leite — muitos adultos perdem a enzima para digeri-la."],tecnicas:["Béchamel: manteiga, farinha e leite — base de lasanhas","Infusão: aquecer o leite com ervas para transferir aromas","Redução: ferver até engrossar para doce de leite caseiro"],receitas:[{n:"Vitamina de Banana com Leite",tipo:"Bebida",tempo:"5min"},{n:"Molho Béchamel",tipo:"Molho base",tempo:"15min"},{n:"Arroz Doce Cremoso",tipo:"Sobremesa",tempo:"40min"}],rd:{n:"Arroz Doce Cremoso",tempo:"40min",rend:"6 porções",ing:["1 xícara arroz","1 litro leite integral","200ml leite condensado","Canela em pau","Cravo","Casca de limão","Canela em pó para servir"],steps:["Cozinhe o arroz no leite com canela em pau, cravo e casca de limão.","Mexa sempre em fogo médio para não grudar.","Após 25min e o arroz macio, adicione leite condensado.","Mexa mais 10min até cremoso.","Retire os temperos e sirva morno ou gelado com canela em pó."],tip:"Mexer constantemente é obrigatório — para em 1 minuto e gruda!",plate:"simples"},preco:{valor:"R$ 4–7/litro",referencia:"Brasil",dica:"Leite de caixinha longa vida é prático; fresco pasteurizado tem mais sabor",melhorEpoca:"ano todo"}},
-
-  manteiga:{emoji:"🧈",name:"Manteiga",cat:"Laticínio",tags:["Francesa","Base da culinária","Sabor único"],desc:"A manteiga de qualidade transforma qualquer prato. A francesa tem mais gordura e sabor. A clarificada aguenta temperaturas altas sem queimar.",grid:[["Origem","Leite integral",""],["Tipos","Comum, sem sal, clarificada, ghee"],["Gordura","82 por cento (européia) vs 80 por cento"],["Ponto de queima","Clarificada aguenta 250 graus"]],nutri:[["Gordura","98"],["Vitamina A","75"],["Vitamina D","55"],["Calorias","muito alta"]],curio:["A manteiga clarificada (ghee) é usada na medicina ayurvédica há milênios.","Manteiga europeia tem mais gordura por lei — 82 por cento mínimo.","O France tem mais de 400 tipos de manteiga com denominações de origem."],tecnicas:["Clarificar: derreter e retirar proteínas do soro","Monter au beurre: incorporar gelada no final do molho","Noisette: dourar até aroma de nozes — ponto de beurre noisette"],receitas:[{n:"Pão com Manteiga e Geleia",tipo:"Café",tempo:"2min"},{n:"Beurre Noisette com Peixe",tipo:"Molho gourmet",tempo:"10min"},{n:"Croissant de Manteiga",tipo:"Panificação",tempo:"3h"}],rd:{n:"Beurre Noisette com Peixe",tempo:"10min",rend:"2 porções",ing:["100g manteiga sem sal","2 filés de peixe branco","Suco de limão","Alcaparras","Salsinha","Sal e pimenta"],steps:["Tempere e grelhe o peixe em outra frigideira. Reserve aquecido.","Na frigideira limpa, derreta a manteiga em fogo médio.","Observe: vai espumar, depois parar de espumar e ficar dourada.","Quando aparecer aroma de nozes e cor caramelo — está pronto!","Adicione limão e alcaparras — vai espirrar, tome cuidado.","Despeje sobre o peixe e finalize com salsinha."],tip:"O ponto noisette é delicado — poucos segundos passam para queimado. Fique presente!",plate:"simples"},preco:{valor:"R$ 12–25/200g",referencia:"Brasil",dica:"Manteiga sem sal de qualidade vale o investimento — é base de tudo",melhorEpoca:"ano todo"}},
-
-  macarrao:{emoji:"🍝",name:"Macarrão",cat:"Carboidrato",tags:["Italiano","Comfort food","Versátil"],desc:"O alimento mais consumido do mundo depois do arroz. No Brasil, o espaguete e o parafuso lideram. A água do cozimento é ingrediente secreto dos melhores molhos.",grid:[["Origem","Itália e China"],["Tipos","Espaguete, penne, rigatoni, fettuccine"],["Cozimento","Al dente — 1min a menos da embalagem"],["Segredo","Água do cozimento!"]],nutri:[["Carboidratos","88"],["Proteína","40"],["Vitaminas B","55"],["Calorias","alta"]],curio:["A água do cozimento do macarrão é rica em amido — usada para engrossar molhos.","Al dente significa ao dente em italiano — deve ter resistência ao morder.","Macarrão seco dura 2 anos; fresco dura apenas 2 dias."],tecnicas:["Al dente: cozinhar 1min a menos do indicado","Água salgada: 10g de sal por litro — salgada como o mar","Finalizar na frigideira: misturar macarrão com molho na panela"],receitas:[{n:"Macarrão ao Sugo Simples",tipo:"Prato",tempo:"25min"},{n:"Espaguete à Carbonara",tipo:"Clássico italiano",tempo:"20min"},{n:"Macarrão à Bolognese",tipo:"Prato elaborado",tempo:"1h30"}],rd:{n:"Macarrão ao Sugo Simples",tempo:"25min",rend:"4 porções",ing:["400g espaguete","1 lata tomate pelado","4 dentes alho","Azeite generoso","Manjericão fresco","Sal, pimenta e pitada de açúcar"],steps:["Ferva água abundante com bastante sal.","Doure o alho fatiado no azeite — não queime!","Adicione o tomate pelado amassado. Cozinhe 15min.","Tempere com sal, açúcar e pimenta.","Cozinhe o macarrão al dente — 1min a menos da embalagem.","Reserve 1 copo da água do cozimento antes de escorrer.","Misture macarrão no molho com um pouco da água. Finalize com manjericão."],tip:"A água do cozimento é ouro — emulsifica o molho e faz grudar na massa!",plate:"simples"},preco:{valor:"R$ 4–8/500g",referencia:"Brasil",dica:"Macarrão de sêmola de trigo duro segura melhor o molho que o comum",melhorEpoca:"ano todo"}},
-
-  acucar:{emoji:"🍯",name:"Açúcar e Mel",cat:"Adoçante",tags:["Universal","Doces","Caramelização"],desc:"O açúcar cristal e o mel são bases de toda a confeitaria brasileira. O mel de qualidade tem sabor único por terroir — cada região tem um mel diferente.",grid:[["Produção","Brasil 1º do mundo em cana"],["Tipos","Cristal, demerara, mascavo, mel"],["Ponto","Caramelo a 170 graus"],["Uso","Doces, bebidas, caramelização"]],nutri:[["Carboidratos","100"],["Energia rápida","100"],["Minerais (mel)","45"],["Calorias","muito alta"]],curio:["O Brasil é o maior produtor mundial de cana-de-açúcar e açúcar.","O mel nunca estraga — arqueólogos encontraram mel comestível com 3000 anos.","Açúcar mascavo tem os minerais que o refino remove."],tecnicas:["Caramelo: derreter em seco a 170 graus sem mexer","Calda: açúcar mais água em pontos definidos por temperatura","Merengue italiano: calda quente sobre claras para estabilizar"],receitas:[{n:"Caramelo Salgado Caseiro",tipo:"Cobertura",tempo:"15min"},{n:"Brigadeiro Gourmet",tipo:"Doce",tempo:"20min"},{n:"Crème Brûlée",tipo:"Sobremesa clássica",tempo:"1h"}],rd:{n:"Caramelo Salgado Caseiro",tempo:"15min",rend:"1 pote",ing:["200g açúcar cristal","100ml creme de leite quente","50g manteiga","1 col chá flor de sal"],steps:["Derreta o açúcar em fogo médio SEM mexer — apenas gire a panela.","Quando dourar em caramelo âmbar, retire do fogo.","Adicione o creme de leite QUENTE aos poucos — vai borbulhar muito!","Mexa bem e adicione a manteiga.","Finalize com a flor de sal e guarde em pote."],tip:"Creme de leite FRIO no caramelo quente causa explosão de vapor — sempre quente!",plate:"simples"},preco:{valor:"R$ 4–6/kg",referencia:"Brasil",dica:"Mel de qualidade tem origem identificada — evite os sem procedência",melhorEpoca:"ano todo"}},
-
-  pimenta:{emoji:"🌶️",name:"Pimenta",cat:"Tempero",tags:["Nacional","Nordeste","Ardência"],desc:"O Brasil tem centenas de variedades nativas de pimenta. A dedo-de-moça é a mais usada; a de cheiro do Pará é aromática; a biquinho é doce e decorativa.",grid:[["Variedades","Centenas nativas BR"],["Mais usada","Dedo-de-moça"],["Pará","Pimenta de cheiro aromática"],["Escala","Scoville mede a ardência"]],nutri:[["Capsaicina","100"],["Vitamina C","90"],["Betacaroteno","75"],["Calorias","muito baixa"]],curio:["A capsaicina — responsável pela ardência — libera endorfinas no cérebro.","O leite neutraliza a ardência melhor que água — a capsaicina é lipossolúvel.","O Brasil tem uma das maiores diversidades de pimentas do mundo."],tecnicas:["Dessemar: retirar sementes reduz a ardência em 80 por cento","Confit: pimenta em azeite para sabor suave","Fermentar: base do tabasco e hot sauces artesanais"],receitas:[{n:"Vinagrete de Pimenta",tipo:"Condimento",tempo:"5min"},{n:"Frango Piri-Piri",tipo:"Prato",tempo:"40min"},{n:"Geleia de Pimenta",tipo:"Conserva",tempo:"40min"}],rd:{n:"Geleia de Pimenta",tempo:"40min",rend:"3 potes",ing:["300g pimenta dedo-de-moça","500g açúcar","200ml vinagre de maçã","Suco de 1 limão","Pitada de sal"],steps:["Higienize as pimentas — use luvas!","Processe no liquidificador com o vinagre.","Misture com açúcar e limão numa panela.","Cozinhe em fogo médio por 30min mexendo sempre.","Faça o teste do prato — uma gota deve firmar ao esfriar.","Envase em potes esterilizados ainda quente."],tip:"Use luvas ao manusear pimentas — a capsaicina fica nos dedos por horas!",plate:"simples"},preco:{valor:"R$ 15–30/kg",referencia:"Brasil",dica:"Pimenta biquinho é decorativa e praticamente sem ardência",melhorEpoca:"ano todo"}},
-
-  banana:{emoji:"🍌",name:"Banana",cat:"Fruta",tags:["Nacional","Litoral paulista","Energia"],desc:"A fruta mais consumida no Brasil. O Vale do Ribeira e o litoral norte paulista produzem banana excelente. Existe também produção significativa em Ubatuba!",grid:[["Região","Vale do Ribeira SP"],["Colheita","Ano todo"],["Variedades","Nanica, prata, d'água, maca"],["Ubatuba","Produção local!"]],nutri:[["Potássio","88"],["Vitamina B6","75"],["Energia rápida","90"],["Calorias","média"]],curio:["A banana Cavendish que comemos hoje substituiu a Gros Michel eliminada por fungo nos anos 50.","Bananas verdes têm amido resistente — prebiótico natural.","Tecnicamente a banana é uma baga e cresce de cabeça para baixo."],tecnicas:["Flambado: banana com rum ou cachaça e açúcar — clássico","Banana da terra: mais firme, ideal para fritar","Desidratada: banana passa — concentra açúcar e sabor"],receitas:[{n:"Banana com Canela e Mel",tipo:"Sobremesa simples",tempo:"5min"},{n:"Banana da Terra Frita",tipo:"Acompanhamento",tempo:"15min"},{n:"Bolo de Banana Caramelada",tipo:"Sobremesa",tempo:"55min"}],rd:{n:"Bolo de Banana Caramelada",tempo:"55min",rend:"10 fatias",ing:["5 bananas maduras","3 ovos","1 xícara óleo","1 e meia xícara açúcar","2 xícaras farinha","1 col sopa fermento","Canela a gosto","Para caramelizar: 100g açúcar e 50g manteiga"],steps:["Caramelize o açúcar com a manteiga na forma de bolo.","Disponha rodelas de banana sobre o caramelo.","Bata no liquidificador as bananas, ovos, óleo e açúcar.","Adicione farinha e fermento na mão — não bata.","Despeje sobre as bananas e asse a 180 graus por 40min.","Desenforme ainda morno para o caramelo escorrer."],tip:"Desenforme morno — se esfriar, o caramelo gruda na forma!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Litoral Norte SP",dica:"Em Ubatuba compre diretamente dos produtores nas feiras — mais barato e fresco",melhorEpoca:"ano todo"}},
-
-  coco:{emoji:"🥥",name:"Coco",cat:"Fruta tropical",tags:["Litoral","Tropical","Base da culinária baiana"],desc:"Sinônimo do litoral brasileiro! A água de coco hidrata como soro fisiológico. O leite de coco é base essencial da culinária baiana e nordestina.",grid:[["Região","Todo litoral BR"],["Colheita","Ano todo"],["Partes","Água, polpa, leite, óleo"],["Capital","Bahia"]],nutri:[["Eletrólitos","90"],["Gordura saudável","75"],["Manganês","65"],["Calorias","alta"]],curio:["A água de coco tem composição semelhante ao plasma sanguíneo.","Um coqueiro produz por mais de 80 anos.","A Bahia produz 30 por cento do coco nacional."],tecnicas:["Leite de coco: ralar a polpa e espremer com água","Óleo de coco: extraído a frio mantém propriedades","Coco tostado: realça sabor em qualquer prato"],receitas:[{n:"Arroz de Coco",tipo:"Acompanhamento",tempo:"25min"},{n:"Moqueca Baiana",tipo:"Prato típico",tempo:"40min"},{n:"Mousse de Coco",tipo:"Sobremesa",tempo:"20min"}],rd:{n:"Mousse de Coco",tempo:"20min mais 2h geladeira",rend:"6 porções",ing:["400ml leite de coco","200ml creme de leite","1 caixinha leite condensado","1 envelope gelatina em pó sem sabor","Coco ralado para decorar"],steps:["Dissolva a gelatina conforme a embalagem.","Bata no liquidificador o leite de coco, creme de leite e leite condensado.","Adicione a gelatina dissolvida e bata mais.","Despeje em taças ou forma e leve à geladeira por 2h.","Decore com coco ralado tostado antes de servir."],tip:"Coco ralado tostado em frigideira seca por 3min transforma a decoração!",plate:"simples"},preco:{valor:"R$ 3–6/unidade",referencia:"Litoral SP",dica:"Em Ubatuba, água de coco fresca diretamente do coco é a melhor opção",melhorEpoca:"ano todo"}}
+  tomate:{emoji:"🍅",name:"Tomate",cat:"Vegetal",tags:["Nacional","Versátil","Base de molhos"],desc:"O mais usado na culinária brasileira.",grid:[["Região","SP e MG lideram"],["Colheita","Ano todo"],["Tipos","Italiano, caqui, cereja"],["Uso","Molhos, saladas, assado"]],nutri:[["Licopeno","95"],["Vitamina C","70"],["Potássio","60"],["Calorias","muito baixa"]],curio:["O tomate é botanicamente uma fruta mas culinariamente um legume.","O licopeno fica mais disponível quando o tomate é cozido.","O Brasil é o 9º maior produtor mundial de tomate."],tecnicas:["Concassé: pelar, dessemar e cortar em cubos","Confit: assar lentamente com azeite e alho","Redução: cozinhar para concentrar o sabor"],receitas:[{n:"Molho de Tomate Caseiro",tipo:"Molho",tempo:"30min"},{n:"Bruschetta de Tomate",tipo:"Entrada",tempo:"15min"},{n:"Tomate Recheado ao Forno",tipo:"Prato",tempo:"40min"}],rd:{n:"Molho de Tomate Caseiro",tempo:"30min",rend:"6 porções",ing:["1kg tomate italiano maduro","4 dentes alho","1 cebola","Azeite","Manjericão fresco","Sal, açúcar e pimenta"],steps:["Refogue cebola e alho no azeite.","Adicione tomates picados sem sementes.","Cozinhe 20min em fogo médio mexendo sempre.","Tempere com sal, pitada de açúcar e pimenta.","Finalize com manjericão fresco."],tip:"A pitada de açúcar equilibra a acidez — segredo dos molhos italianos!",plate:"simples"},preco:{valor:"R$ 4–8/kg",referencia:"Brasil",dica:"Tomate italiano é mais barato e ideal para molhos",melhorEpoca:"fev–jun"}},
+  alho:{emoji:"🧄",name:"Alho",cat:"Tempero",tags:["Universal","Tempero base","Saúde"],desc:"Base de quase toda a culinária brasileira.",grid:[["Região","Curitibanos–SC lidera"],["Colheita","Nov–Jan"],["Uso","Base de refogados"],["Tipos","Nacional e importado"]],nutri:[["Alicina","100"],["Vitamina B6","75"],["Manganês","65"],["Calorias","muito baixa"]],curio:["O Brasil importa 90 por cento do alho consumido da China.","A alicina é destruída pelo calor excessivo.","Alho roxo nacional tem sabor muito mais intenso."],tecnicas:["Laminar: fatias finas para dourar","Brunoise: cubinhos para refogar","Confitar: cozinhar em azeite baixo para sabor suave"],receitas:[{n:"Alho ao Azeite para Pão",tipo:"Petisco",tempo:"20min"},{n:"Frango ao Alho e Limão",tipo:"Prato",tempo:"40min"},{n:"Pasta de Alho Confit",tipo:"Entrada gourmet",tempo:"1h"}],rd:{n:"Pasta de Alho Confit",tempo:"1h",rend:"1 pote",ing:["2 cabeças de alho inteiras","200ml azeite extra virgem","Alecrim e tomilho","Sal e pimenta"],steps:["Corte o topo das cabeças de alho.","Coloque numa assadeira pequena, regue com azeite.","Adicione ervas, sal e pimenta.","Cubra com alumínio e asse a 160 graus por 50min.","Esprema os dentes — viraram pasta cremosa.","Guarde na geladeira coberto com azeite."],tip:"O alho confit dura 2 semanas na geladeira!",plate:"simples"},preco:{valor:"R$ 20–35/kg",referencia:"Brasil",dica:"Alho roxo nacional tem mais sabor",melhorEpoca:"dez–mar"}},
+  limao:{emoji:"🍋",name:"Limão Tahiti",cat:"Citrus",tags:["Nacional","Acidez","1º do mundo"],desc:"O Brasil é o maior produtor mundial de limão tahiti.",grid:[["Região","SP e MG"],["Colheita","Ano todo"],["Tipo real","Lima ácida"],["Produção","1º do mundo"]],nutri:[["Vitamina C","80"],["Flavonoides","70"],["Ácido cítrico","100"],["Calorias","muito baixa"]],curio:["O limão tahiti não é um limão verdadeiro — é uma lima ácida!","A casca tem 5 vezes mais sabor que o suco.","O Brasil é o maior produtor mundial."],tecnicas:["Zest: raspar a casca para aromas intensos","Cura: suco de limão cozinha proteínas","Limonada suíça: bater o limão inteiro"],receitas:[{n:"Limonada Suíça",tipo:"Bebida",tempo:"10min"},{n:"Ceviche de Tilápia",tipo:"Entrada",tempo:"25min"},{n:"Torta de Limão",tipo:"Sobremesa",tempo:"1h"}],rd:{n:"Limonada Suíça",tempo:"10min",rend:"4 porções",ing:["4 limões tahiti grandes","1 lata leite condensado","500ml água gelada","200ml creme de leite","Gelo e hortelã"],steps:["Lave muito bem os limões.","Corte em quartos e bata no liquidificador com água por 10 segundos.","Coe rapidamente.","Bata novamente com leite condensado e creme de leite.","Sirva com muito gelo e hortelã."],tip:"Bata rápido — bater demais amarga pela casca!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Litoral SP",dica:"Em Ubatuba encontra limão fresco barato nas feiras",melhorEpoca:"ano todo"}},
+  cebola:{emoji:"🧅",name:"Cebola",cat:"Tempero",tags:["Universal","Base de refogados","Nacional"],desc:"Base de quase toda a culinária mundial.",grid:[["Região","SP, MG, RS"],["Colheita","Jun–Set"],["Tipos","Branca, roxa, caipira"],["Uso","Base de todo refogado"]],nutri:[["Quercetina","88"],["Vitamina C","55"],["Fibras","50"],["Calorias","muito baixa"]],curio:["A cebola faz chorar por causa do sulfóxido de alquila.","Para não chorar: refrigere antes de cortar.","A cebola caramelizada leva de 45min a 1h."],tecnicas:["Brunoise: cubinhos finos para refogar","Julienne: tiras para saladas","Caramelizar: fogo baixo, 45min mínimo"],receitas:[{n:"Cebola Caramelizada",tipo:"Acompanhamento",tempo:"50min"},{n:"Sopa de Cebola Francesa",tipo:"Entrada quente",tempo:"1h"},{n:"Vinagrete de Cebola Roxa",tipo:"Condimento",tempo:"10min"}],rd:{n:"Sopa de Cebola Francesa",tempo:"1h",rend:"4 porções",ing:["6 cebolas grandes fatiadas","50g manteiga","200ml vinho branco seco","1L caldo de carne","4 fatias pão rústico","100g gruyère","Sal, pimenta e tomilho"],steps:["Caramelize as cebolas na manteiga por 45min em fogo baixo.","Adicione o vinho e deixe evaporar.","Adicione o caldo e cozinhe mais 15min.","Tempere com sal, pimenta e tomilho.","Sirva em tigelas com pão por cima coberto com queijo.","Gratine no forno a 220 graus por 10min."],tip:"A caramelização verdadeira leva tempo!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Brasil",dica:"Cebola roxa é mais cara mas mais versátil",melhorEpoca:"jun–set"}},
+  cenoura:{emoji:"🥕",name:"Cenoura",cat:"Vegetal",tags:["Nacional","Versátil","Doce natural"],desc:"Rica em betacaroteno que o corpo converte em vitamina A.",grid:[["Região","MG, SP, PR"],["Colheita","Ano todo"],["Cor","Beta-caroteno"],["Uso","Crua, cozida, assada, bolo"]],nutri:[["Betacaroteno","100"],["Vitamina A","95"],["Fibras","60"],["Calorias","baixa"]],curio:["A cenoura original era roxa — a laranja foi desenvolvida pelos holandeses.","Cozinhar aumenta a disponibilidade do betacaroteno em até 40 por cento.","A casca tem mais nutrientes que o interior."],tecnicas:["Glacear: cozinhar com manteiga e açúcar","Brunoise: cubinhos para sopas","Assar inteira: concentra o sabor"],receitas:[{n:"Bolo de Cenoura com Chocolate",tipo:"Sobremesa",tempo:"50min"},{n:"Cenoura Glaceada",tipo:"Acompanhamento",tempo:"20min"},{n:"Sopa Cremosa de Cenoura",tipo:"Entrada",tempo:"30min"}],rd:{n:"Bolo de Cenoura com Cobertura de Chocolate",tempo:"50min",rend:"10 fatias",ing:["3 cenouras médias","3 ovos","1 xícara óleo","2 xícaras açúcar","2 xícaras farinha","1 col sopa fermento","Para cobertura: 200g chocolate, 100ml creme de leite"],steps:["Bata no liquidificador as cenouras, ovos e óleo.","Adicione açúcar e bata mais.","Misture farinha e fermento na mão.","Asse a 180 graus por 35min.","Derreta o chocolate com o creme de leite.","Despeje a cobertura quente sobre o bolo frio."],tip:"Não abra o forno antes de 30min!",plate:"simples"},preco:{valor:"R$ 3–5/kg",referencia:"Brasil",dica:"Cenoura com folha é mais fresca",melhorEpoca:"ano todo"}},
+  batata_doce:{emoji:"🍠",name:"Batata-doce",cat:"Carboidrato",tags:["Fitness","Nacional","Versátil"],desc:"Queridinha dos atletas e da culinária saudável.",grid:[["Região","Todo o Brasil"],["Colheita","Ago–Dez"],["Variedades","Branca, laranja, roxa"],["Benefício","Índice glicêmico baixo"]],nutri:[["Betacaroteno","95"],["Vitamina A","90"],["Fibras","65"],["Calorias","média"]],curio:["A batata-doce roxa tem antocianinas — o mesmo pigmento do vinho tinto.","É usada por astronautas da NASA.","Na Okinawa é base da dieta dos centenários."],tecnicas:["Assar com casca: preserva nutrientes","Purê: textura mais cremosa","Chips: fatias finas no forno com azeite"],receitas:[{n:"Batata-doce Assada com Mel",tipo:"Acompanhamento",tempo:"40min"},{n:"Purê de Batata-doce",tipo:"Acompanhamento",tempo:"30min"},{n:"Chips de Batata-doce no Forno",tipo:"Petisco saudável",tempo:"35min"}],rd:{n:"Chips de Batata-doce no Forno",tempo:"35min",rend:"4 porções",ing:["2 batatas-doces grandes","3 col sopa azeite","Sal grosso","Páprica defumada","Alecrim seco","Pimenta do reino"],steps:["Pré-aqueça o forno a 200 graus.","Fatie as batatas-doces bem finas.","Misture com azeite e temperos.","Espalhe em camada única em assadeira.","Asse 20min, vire e asse mais 10 a 15min."],tip:"Quanto mais finas as fatias, mais crocante!",plate:"simples"},preco:{valor:"R$ 4–7/kg",referencia:"Brasil",dica:"Compre a roxa para mais antioxidantes",melhorEpoca:"ago–dez"}},
+  ovo:{emoji:"🥚",name:"Ovo",cat:"Proteína",tags:["Universal","Proteína completa","Versátil"],desc:"Um dos ingredientes mais versáteis da culinária. Proteína completa.",grid:[["Produção","Brasil 3º do mundo"],["Tipos","Branco, caipira, orgânico"],["Proteína","Completa — todos aminoácidos"],["Uso","Do café à sobremesa"]],nutri:[["Proteína completa","98"],["Colina","85"],["Vitamina D","70"],["Calorias","média"]],curio:["O ovo caipira tem gema mais laranja.","Para saber se é fresco: mergulhe em água — se afunda, é fresco.","A clara tem a mesma proteína que a gema."],tecnicas:["Pochê: cozinhar sem casca em água com vinagre","Beneditino: pochê sobre pão com hollandaise","Merengar: bater clara até picos firmes"],receitas:[{n:"Ovo Mexido Cremoso",tipo:"Café da manhã",tempo:"5min"},{n:"Ovo Pochê com Torrada",tipo:"Brunch",tempo:"10min"},{n:"Omelete de Ervas Finas",tipo:"Refeição leve",tempo:"10min"}],rd:{n:"Ovo Mexido Cremoso",tempo:"5min",rend:"1 porção",ing:["3 ovos","1 col sopa manteiga","Sal e pimenta","Cebolinha picada"],steps:["Bata os ovos levemente.","Coloque manteiga em frigideira em fogo MUITO baixo.","Adicione os ovos e mexa lentamente com espátula.","Retire do fogo antes de parecer pronto.","Tempere e sirva imediatamente."],tip:"Fogo baixo e retirar antes de estar pronto — o segredo!",plate:"simples"},preco:{valor:"R$ 12–25/dúzia",referencia:"Brasil",dica:"Ovo caipira tem mais sabor e gema mais alaranjada",melhorEpoca:"ano todo"}},
+  leite:{emoji:"🥛",name:"Leite",cat:"Laticínio",tags:["Nacional","Base de molhos","Versátil"],desc:"Base de inúmeras preparações. O Brasil é o 3º maior produtor mundial.",grid:[["Região","MG, SP, RS"],["Tipos","Integral, semi, desnatado"],["Produção","3º do mundo"],["Uso","Molhos, sobremesas, bebidas"]],nutri:[["Cálcio","95"],["Proteína","75"],["Vitamina D","70"],["Calorias","média"]],curio:["O Brasil é o 3º maior produtor de leite do mundo.","Leite integral tem mais vitaminas lipossolúveis.","A lactose é o açúcar natural do leite."],tecnicas:["Béchamel: manteiga, farinha e leite","Infusão: aquecer o leite com ervas","Redução: ferver até engrossar"],receitas:[{n:"Vitamina de Banana",tipo:"Bebida",tempo:"5min"},{n:"Molho Béchamel",tipo:"Molho base",tempo:"15min"},{n:"Arroz Doce Cremoso",tipo:"Sobremesa",tempo:"40min"}],rd:{n:"Arroz Doce Cremoso",tempo:"40min",rend:"6 porções",ing:["1 xícara arroz","1 litro leite integral","200ml leite condensado","Canela em pau","Cravo","Casca de limão"],steps:["Cozinhe o arroz no leite com canela, cravo e casca de limão.","Mexa sempre em fogo médio.","Após 25min e o arroz macio, adicione leite condensado.","Mexa mais 10min até cremoso.","Sirva morno ou gelado com canela em pó."],tip:"Mexer constantemente é obrigatório!",plate:"simples"},preco:{valor:"R$ 4–7/litro",referencia:"Brasil",dica:"Leite fresco pasteurizado tem mais sabor",melhorEpoca:"ano todo"}},
+  manteiga:{emoji:"🧈",name:"Manteiga",cat:"Laticínio",tags:["Francesa","Base da culinária","Sabor único"],desc:"A manteiga de qualidade transforma qualquer prato.",grid:[["Tipos","Comum, sem sal, clarificada, ghee"],["Gordura","82 por cento europeia"],["Ponto de queima","Clarificada aguenta 250 graus"],["Uso","Base de tudo"]],nutri:[["Gordura","98"],["Vitamina A","75"],["Vitamina D","55"],["Calorias","muito alta"]],curio:["A manteiga clarificada (ghee) é usada na medicina ayurvédica há milênios.","Manteiga europeia tem mais gordura por lei.","A França tem mais de 400 tipos de manteiga."],tecnicas:["Clarificar: derreter e retirar proteínas","Monter au beurre: incorporar gelada no molho","Noisette: dourar até aroma de nozes"],receitas:[{n:"Pão com Manteiga e Geleia",tipo:"Café",tempo:"2min"},{n:"Beurre Noisette com Peixe",tipo:"Molho gourmet",tempo:"10min"},{n:"Croissant de Manteiga",tipo:"Panificação",tempo:"3h"}],rd:{n:"Beurre Noisette com Peixe",tempo:"10min",rend:"2 porções",ing:["100g manteiga sem sal","2 filés de peixe branco","Suco de limão","Alcaparras","Salsinha","Sal e pimenta"],steps:["Tempere e grelhe o peixe. Reserve aquecido.","Derreta a manteiga em fogo médio.","Observe: vai espumar, depois ficar dourada com aroma de nozes.","Adicione limão e alcaparras.","Despeje sobre o peixe e finalize com salsinha."],tip:"O ponto noisette é delicado — poucos segundos passam para queimado!",plate:"simples"},preco:{valor:"R$ 12–25/200g",referencia:"Brasil",dica:"Manteiga sem sal de qualidade vale o investimento",melhorEpoca:"ano todo"}},
+  macarrao:{emoji:"🍝",name:"Macarrão",cat:"Carboidrato",tags:["Italiano","Comfort food","Versátil"],desc:"O alimento mais consumido no mundo depois do arroz.",grid:[["Tipos","Espaguete, penne, rigatoni"],["Cozimento","Al dente — 1min a menos"],["Segredo","Água do cozimento!"],["Origem","Itália e China"]],nutri:[["Carboidratos","88"],["Proteína","40"],["Vitaminas B","55"],["Calorias","alta"]],curio:["A água do cozimento é rica em amido — usada para engrossar molhos.","Al dente significa ao dente em italiano.","Macarrão seco dura 2 anos; fresco dura 2 dias."],tecnicas:["Al dente: 1min a menos do indicado","Água salgada: 10g de sal por litro","Finalizar na frigideira com o molho"],receitas:[{n:"Macarrão ao Sugo",tipo:"Prato",tempo:"25min"},{n:"Espaguete à Carbonara",tipo:"Clássico",tempo:"20min"},{n:"Macarrão à Bolognese",tipo:"Elaborado",tempo:"1h30"}],rd:{n:"Macarrão ao Sugo Simples",tempo:"25min",rend:"4 porções",ing:["400g espaguete","1 lata tomate pelado","4 dentes alho","Azeite generoso","Manjericão fresco","Sal, pimenta e pitada de açúcar"],steps:["Ferva água abundante com bastante sal.","Doure o alho fatiado no azeite.","Adicione o tomate pelado amassado. Cozinhe 15min.","Cozinhe o macarrão al dente.","Reserve 1 copo da água do cozimento.","Misture macarrão no molho com a água. Finalize com manjericão."],tip:"A água do cozimento é ouro — emulsifica o molho!",plate:"simples"},preco:{valor:"R$ 4–8/500g",referencia:"Brasil",dica:"Macarrão de sêmola segura melhor o molho",melhorEpoca:"ano todo"}},
+  acucar:{emoji:"🍯",name:"Açúcar e Mel",cat:"Adoçante",tags:["Universal","Doces","Caramelização"],desc:"Base de toda a confeitaria brasileira. O Brasil é o maior produtor mundial.",grid:[["Produção","Brasil 1º do mundo em cana"],["Tipos","Cristal, demerara, mascavo, mel"],["Ponto","Caramelo a 170 graus"],["Uso","Doces, bebidas, caramelização"]],nutri:[["Carboidratos","100"],["Energia rápida","100"],["Minerais (mel)","45"],["Calorias","muito alta"]],curio:["O Brasil é o maior produtor mundial de cana-de-açúcar.","O mel nunca estraga — encontraram mel com 3000 anos.","Açúcar mascavo tem os minerais que o refino remove."],tecnicas:["Caramelo: derreter em seco a 170 graus sem mexer","Calda: açúcar mais água em pontos por temperatura","Merengue italiano: calda quente sobre claras"],receitas:[{n:"Caramelo Salgado",tipo:"Cobertura",tempo:"15min"},{n:"Brigadeiro Gourmet",tipo:"Doce",tempo:"20min"},{n:"Crème Brûlée",tipo:"Sobremesa clássica",tempo:"1h"}],rd:{n:"Caramelo Salgado Caseiro",tempo:"15min",rend:"1 pote",ing:["200g açúcar cristal","100ml creme de leite quente","50g manteiga","1 col chá flor de sal"],steps:["Derreta o açúcar em fogo médio SEM mexer.","Quando dourar em caramelo âmbar, retire do fogo.","Adicione o creme de leite QUENTE aos poucos.","Mexa bem e adicione a manteiga.","Finalize com a flor de sal."],tip:"Creme de leite FRIO no caramelo quente causa explosão de vapor!",plate:"simples"},preco:{valor:"R$ 4–6/kg",referencia:"Brasil",dica:"Mel de qualidade tem origem identificada",melhorEpoca:"ano todo"}},
+  pimenta:{emoji:"🌶️",name:"Pimenta",cat:"Tempero",tags:["Nacional","Nordeste","Ardência"],desc:"O Brasil tem centenas de variedades nativas de pimenta.",grid:[["Variedades","Centenas nativas BR"],["Mais usada","Dedo-de-moça"],["Pará","Pimenta de cheiro"],["Escala","Scoville mede ardência"]],nutri:[["Capsaicina","100"],["Vitamina C","90"],["Betacaroteno","75"],["Calorias","muito baixa"]],curio:["A capsaicina libera endorfinas no cérebro.","O leite neutraliza a ardência melhor que água.","O Brasil tem uma das maiores diversidades de pimentas."],tecnicas:["Dessemar: retirar sementes reduz ardência 80 por cento","Confit: pimenta em azeite para sabor suave","Fermentar: base do tabasco"],receitas:[{n:"Vinagrete de Pimenta",tipo:"Condimento",tempo:"5min"},{n:"Frango Piri-Piri",tipo:"Prato",tempo:"40min"},{n:"Geleia de Pimenta",tipo:"Conserva",tempo:"40min"}],rd:{n:"Geleia de Pimenta",tempo:"40min",rend:"3 potes",ing:["300g pimenta dedo-de-moça","500g açúcar","200ml vinagre de maçã","Suco de 1 limão","Pitada de sal"],steps:["Higienize as pimentas — use luvas!","Processe no liquidificador com o vinagre.","Misture com açúcar e limão numa panela.","Cozinhe em fogo médio por 30min mexendo sempre.","Envase em potes esterilizados ainda quente."],tip:"Use luvas ao manusear pimentas — a capsaicina fica nos dedos por horas!",plate:"simples"},preco:{valor:"R$ 15–30/kg",referencia:"Brasil",dica:"Pimenta biquinho é decorativa e praticamente sem ardência",melhorEpoca:"ano todo"}},
+  banana:{emoji:"🍌",name:"Banana",cat:"Fruta",tags:["Nacional","Litoral paulista","Energia"],desc:"A fruta mais consumida no Brasil. Produção significativa em Ubatuba!",grid:[["Região","Vale do Ribeira SP"],["Colheita","Ano todo"],["Variedades","Nanica, prata, d'água, maca"],["Ubatuba","Produção local!"]],nutri:[["Potássio","88"],["Vitamina B6","75"],["Energia rápida","90"],["Calorias","média"]],curio:["A banana Cavendish substituiu a Gros Michel eliminada por fungo nos anos 50.","Bananas verdes têm amido resistente — prebiótico natural.","Tecnicamente a banana é uma baga."],tecnicas:["Flambado: banana com rum e açúcar","Banana da terra: mais firme, ideal para fritar","Desidratada: concentra açúcar e sabor"],receitas:[{n:"Banana com Canela e Mel",tipo:"Sobremesa simples",tempo:"5min"},{n:"Banana da Terra Frita",tipo:"Acompanhamento",tempo:"15min"},{n:"Bolo de Banana Caramelada",tipo:"Sobremesa",tempo:"55min"}],rd:{n:"Bolo de Banana Caramelada",tempo:"55min",rend:"10 fatias",ing:["5 bananas maduras","3 ovos","1 xícara óleo","1 e meia xícara açúcar","2 xícaras farinha","1 col sopa fermento","Para caramelizar: 100g açúcar e 50g manteiga"],steps:["Caramelize o açúcar com a manteiga na forma.","Disponha rodelas de banana sobre o caramelo.","Bata no liquidificador as bananas, ovos, óleo e açúcar.","Adicione farinha e fermento na mão.","Despeje sobre as bananas e asse a 180 graus por 40min.","Desenforme ainda morno."],tip:"Desenforme morno — se esfriar, o caramelo gruda na forma!",plate:"simples"},preco:{valor:"R$ 3–6/kg",referencia:"Litoral Norte SP",dica:"Em Ubatuba compre diretamente dos produtores nas feiras",melhorEpoca:"ano todo"}},
+  coco:{emoji:"🥥",name:"Coco",cat:"Fruta tropical",tags:["Litoral","Tropical","Base da culinária baiana"],desc:"Sinônimo do litoral brasileiro! Base essencial da culinária baiana.",grid:[["Região","Todo litoral BR"],["Colheita","Ano todo"],["Partes","Água, polpa, leite, óleo"],["Capital","Bahia"]],nutri:[["Eletrólitos","90"],["Gordura saudável","75"],["Manganês","65"],["Calorias","alta"]],curio:["A água de coco tem composição semelhante ao plasma sanguíneo.","Um coqueiro produz por mais de 80 anos.","A Bahia produz 30 por cento do coco nacional."],tecnicas:["Leite de coco: ralar a polpa e espremer com água","Óleo de coco: extraído a frio","Coco tostado: realça sabor"],receitas:[{n:"Arroz de Coco",tipo:"Acompanhamento",tempo:"25min"},{n:"Moqueca Baiana",tipo:"Prato típico",tempo:"40min"},{n:"Mousse de Coco",tipo:"Sobremesa",tempo:"20min"}],rd:{n:"Mousse de Coco",tempo:"20min mais 2h geladeira",rend:"6 porções",ing:["400ml leite de coco","200ml creme de leite","1 caixinha leite condensado","1 envelope gelatina sem sabor","Coco ralado para decorar"],steps:["Dissolva a gelatina conforme a embalagem.","Bata no liquidificador o leite de coco, creme e leite condensado.","Adicione a gelatina dissolvida e bata mais.","Despeje em taças e leve à geladeira por 2h.","Decore com coco ralado tostado."],tip:"Coco ralado tostado em frigideira seca por 3min transforma a decoração!",plate:"simples"},preco:{valor:"R$ 3–6/unidade",referencia:"Litoral SP",dica:"Em Ubatuba, água de coco fresca diretamente do coco",melhorEpoca:"ano todo"}}
 };
 
 const CATS=["Todos","Fruta","Carne","Peixe","Grão","Carboidrato","Vegetal","Laticínio"];
@@ -541,6 +552,33 @@ let pendingAct=null;
 let selectedPayOpt="pack";
 let selectedTipVal=0, selectedTipPhotos=0, selectedTipIng=0;
 let comboSelected=[];
+
+// ── OBJETIVO COMBINADOR ──
+var comboObjetivo='geral';
+var OBJETIVO_FOODS={
+  emagrecer:['brocolis','cenoura','tomate','alho','limao','cebola','frango','ovo','pimenta','batata_doce'],
+  massa:['frango','ovo','feijao','arroz','batata_doce','queijo','leite','manteiga','batata','salmon','picanha'],
+  geral:[]
+};
+var OBJETIVO_TIPS={
+  geral:'🍽️ <strong>Cotidiano:</strong> Receitas práticas, saborosas e sem restrições — para o dia a dia.',
+  emagrecer:'🥗 <strong>Emagrecer:</strong> Foco em alto volume e baixa caloria. Os alimentos com ★ são os mais recomendados para emagrecimento.',
+  massa:'💪 <strong>Ganhar massa:</strong> Foco em proteína e carboidrato complexo. Os alimentos com ★ são os mais recomendados para hipertrofia.'
+};
+var OBJETIVO_PROMPTS={
+  geral:'',
+  emagrecer:' IMPORTANTE — FOCO EM EMAGRECIMENTO: crie receitas com baixo carboidrato, alto volume, ingredientes termogênicos e baixa caloria. Inclua a caloria aproximada por porção em cada receita.',
+  massa:' IMPORTANTE — FOCO EM GANHO DE MASSA MUSCULAR: crie receitas ricas em proteína (mínimo 30g por porção), com carboidratos complexos e superávit calórico. Inclua a quantidade aproximada de proteína por porção em cada receita.'
+};
+
+function selectObjetivo(obj){
+  comboObjetivo=obj;
+  ['geral','emagrecer','massa'].forEach(function(o){
+    document.getElementById('obj-'+o).classList.toggle('active',o===obj);
+  });
+  document.getElementById('obj-tip').innerHTML=OBJETIVO_TIPS[obj];
+  renderComboGrid();
+}
 
 // ── CADASTRO & GEO FUNCTIONS ──
 function saveCadastro(){
@@ -668,17 +706,13 @@ function pay(type){
   closeModal("modal-photo");
   closeModal("modal-ingredient");
   if(type==="photo"){
-    usage.photos++;
-    saveUsage();
-    updateUsageUI();
-    setStatus("✅ Acesso liberado! Analisando foto...");
+    usage.photos++;saveUsage();updateUsageUI();
+    setStatus("✅ Acesso liberado!");
     if(pendingAct){pendingAct();pendingAct=null;}
     return;
   }
   if(type==="unlimited"){
-    usage.unlimited=true;
-    saveUsage();
-    updateUsageUI();
+    usage.unlimited=true;saveUsage();updateUsageUI();
     setStatus("✅ Acesso ilimitado liberado!");
     if(pendingAct){pendingAct();pendingAct=null;}
     return;
@@ -760,7 +794,6 @@ function snap(){
 }
 
 function analyzeImg(dataUrl){
-  // Consume a photo credit
   if(usage.bonusPhotos>0){usage.bonusPhotos--;}
   saveUsage();updateUsageUI();
   document.getElementById("scan-ov").classList.add("on");
@@ -791,10 +824,10 @@ function analyzeImg(dataUrl){
   .catch(function(e){
     document.getElementById("scan-ov").classList.remove("on");
     document.getElementById("ai-box").classList.add("hidden");
-    console.error("Erro:",e);
     setStatus("Erro ao analisar. Tente novamente.","err");
   });
 }
+
 function displayResult(food,fromAI){
   curFood=food;
   document.getElementById("r-em").textContent=food.emoji||"🍽️";
@@ -923,49 +956,143 @@ function libSelect(el){
   setStatus("📚 "+f.name+" — Perfil: "+PROFILES[selProfile].name);
 }
 
-// ── PAY FUNCTIONS ──
-function selectPayOpt(opt){
-  selectedPayOpt=opt;
-  var s=document.getElementById("pay-photo-single");
-  var p=document.getElementById("pay-photo-pack");
-  var btn=document.getElementById("btn-pay-photo");
-  if(opt==="single"){
-    s.style.borderColor="#1D9E75";s.style.background="#f0fdf8";
-    p.style.borderColor="#eee";p.style.background="#fff";
-    btn.textContent="Pagar R$5 — 1 foto";
+// ── COMBO FUNCTIONS ──
+function renderComboGrid(){
+  var q=(document.getElementById("combo-srch")&&document.getElementById("combo-srch").value||"").toLowerCase();
+  var keys=Object.keys(FOODS).filter(function(k){
+    return !q||FOODS[k].name.toLowerCase().includes(q);
+  });
+  var recList=OBJETIVO_FOODS[comboObjetivo]||[];
+  document.getElementById("combo-grid").innerHTML=keys.map(function(k){
+    var f=FOODS[k];
+    var picked=comboSelected.indexOf(k)>=0;
+    var rec=recList.indexOf(k)>=0;
+    return '<div class="combo-fc'+(picked?" picked":"")+(rec?" recommended":"")+'" onclick="toggleCombo(this)" data-key="'+k+'"><div class="combo-fc-em">'+f.emoji+'</div><div class="combo-fc-nm">'+f.name+"</div></div>";
+  }).join("");
+}
+
+function toggleCombo(el){
+  var k=el.dataset.key;
+  var idx=comboSelected.indexOf(k);
+  if(idx>=0){
+    comboSelected.splice(idx,1);
+    el.classList.remove("picked");
   } else {
-    p.style.borderColor="#1D9E75";p.style.background="#f0fdf8";
-    s.style.borderColor="#eee";s.style.background="#fff";
-    btn.textContent="Pagar R$10 — 4 fotos";
+    if(comboSelected.length>=5){alert("Máximo de 5 alimentos por combinação.");return;}
+    comboSelected.push(k);
+    el.classList.add("picked");
   }
+  updateComboSelected();
 }
 
-function payPhoto(){
-  closeModal("modal-photo");
-  if(selectedPayOpt==="single"){
-    usage.bonusPhotos+=1;
+function updateComboSelected(){
+  var sel=document.getElementById("combo-selected");
+  var btn=document.getElementById("btn-combo");
+  if(comboSelected.length===0){
+    sel.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Nenhum alimento selecionado ainda</div>';
+    btn.disabled=true;
   } else {
-    usage.bonusPhotos+=4;
-  }
-  saveUsage();updateUsageUI();
-  setStatus("✅ Créditos adicionados! Analisando foto...");
-  if(pendingAct){pendingAct();pendingAct=null;}
-}
-
-function pay(type){
-  closeModal("modal-photo");closeModal("modal-ingredient");
-  if(type==="photo"){
-    usage.bonusPhotos+=1;saveUsage();updateUsageUI();
-    setStatus("✅ Crédito adicionado!");
-    if(pendingAct){pendingAct();pendingAct=null;}
-  } else if(type==="ingredients"){
-    usage.bonusIng+=10;saveUsage();updateUsageUI();
-    setStatus("✅ 10 pesquisas adicionadas!");
-    if(pendingAct){pendingAct();pendingAct=null;}
+    sel.innerHTML=comboSelected.map(function(k){
+      var f=FOODS[k];
+      return '<div class="combo-chip">'+f.emoji+' '+f.name+'<button class="combo-chip-rm" onclick="removeCombo(\''+k+'\')" >×</button></div>';
+    }).join("");
+    btn.disabled=comboSelected.length<2;
   }
 }
 
-// ── TIP / GORJETA FUNCTIONS ──
+function removeCombo(k){
+  var idx=comboSelected.indexOf(k);
+  if(idx>=0)comboSelected.splice(idx,1);
+  renderComboGrid();
+  updateComboSelected();
+}
+
+function generateCombo(){
+  if(comboSelected.length<2){alert("Selecione pelo menos 2 alimentos.");return;}
+  var btn=document.getElementById("btn-combo");
+  btn.textContent="⏳ Gerando...";btn.disabled=true;
+  var names=comboSelected.map(function(k){return FOODS[k].name;});
+  var emojis=comboSelected.map(function(k){return FOODS[k].emoji;});
+  var p=PROFILES[selProfile];
+  var objExtra=OBJETIVO_PROMPTS[comboObjetivo]||'';
+  var prompt='Voce e um chef especialista. O usuario tem estes alimentos: '+names.join(', ')+'. Nivel: '+p.prompt+'.'+objExtra+' Crie 3 receitas que combinam esses ingredientes. Responda APENAS em JSON valido: {"titulo":"string","receitas":[{"n":"nome da receita","tipo":"tipo","tempo":"Xmin","desc":"descricao breve de 1 frase","ingredientes":["ingrediente 1 com quantidade","ingrediente 2"],"passos":["Passo 1","Passo 2","Passo 3","Passo 4"],"dica":"dica do chef"}],"nutri":"paragrafo sobre beneficios nutricionais combinados","harmonizacao":"sugestao de bebida e harmonizacao"}';
+  fetch("/api/analyze",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({imageData:null,mediaType:null,profile:p.prompt,locationCtx:"",comboPrompt:prompt,isCombo:true})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
+    if(data.error)throw new Error(data.error);
+    var objIcon=comboObjetivo==='emagrecer'?'🥗 ':comboObjetivo==='massa'?'💪 ':'';
+    document.getElementById("combo-result-title").textContent=objIcon+emojis.join("")+" "+names.join(" + ");
+    var comboReceitas=data.receitas||[];
+    document.getElementById("combo-recs").innerHTML=comboReceitas.map(function(r,i){
+      return '<div class="combo-rec" onclick="showComboDetail('+i+')" style="cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="combo-rec-name">'+r.n+'</div><span style="font-size:10px;color:#1D9E75;font-weight:700">Ver passo a passo →</span></div><div class="combo-rec-meta">'+r.tipo+' · ⏱ '+r.tempo+'</div><div style="font-size:12px;color:#666;margin-top:4px">'+r.desc+'</div></div>';
+    }).join("");
+    window._comboReceitas=comboReceitas;
+    document.getElementById("combo-nutri").textContent=data.nutri||"";
+    document.getElementById("combo-harm").textContent=data.harmonizacao||"";
+    document.getElementById("combo-result-area").style.display="block";
+  })
+  .catch(function(e){
+    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
+    alert("Erro ao gerar combinação. Tente novamente.");
+  });
+}
+
+function notifyMe(btn){
+  var email=prompt("Informe seu e-mail para ser avisado:");
+  if(email&&email.includes("@")){btn.textContent="✅ Avisaremos você!";btn.disabled=true;}
+}
+
+function showComboDetail(i){
+  var r=window._comboReceitas&&window._comboReceitas[i];
+  if(!r)return;
+  var html='<div style="background:#f8f8f8;border-radius:12px;padding:12px;margin-bottom:12px">';
+  html+='<div style="font-size:14px;font-weight:700;color:#222;margin-bottom:8px">'+r.n+'</div>';
+  html+='<div id="dish-img-wrap" style="width:100%;height:180px;background:#eee;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden"><div style="text-align:center;color:#aaa"><div style="font-size:28px;margin-bottom:4px">🎨</div><div style="font-size:12px">Gerando imagem do prato...</div></div></div>';
+  if(r.ingredientes&&r.ingredientes.length){
+    html+='<div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;margin-bottom:6px">Ingredientes</div>';
+    html+=r.ingredientes.map(function(ing){return '<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid #eee">• '+ing+'</div>';}).join("");
+  }
+  if(r.passos&&r.passos.length){
+    html+='<div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;margin:10px 0 6px">Modo de preparo</div>';
+    html+=r.passos.map(function(p,j){return '<div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start"><div style="min-width:22px;height:22px;border-radius:50%;background:#1D9E75;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(j+1)+'</div><div style="font-size:12px;color:#555;line-height:1.5;padding-top:2px">'+p+'</div></div>';}).join("");
+  }
+  if(r.dica){
+    html+='<div style="background:#E1F5EE;border-radius:8px;padding:10px;margin-top:8px;font-size:11px;color:#0F6E56"><strong>💡 Dica:</strong> '+r.dica+'</div>';
+  }
+  html+='</div>';
+  document.getElementById("combo-detail").innerHTML=html;
+  document.getElementById("combo-detail-area").style.display="block";
+  document.getElementById("combo-detail-area").scrollIntoView({behavior:"smooth"});
+  generateDishImage(r.n);
+}
+
+function generateDishImage(dishName){
+  var wrap=document.getElementById("dish-img-wrap");
+  if(!wrap)return;
+  fetch("/api/imagegen",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({dish:dishName})
+  })
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(data.url){
+      wrap.innerHTML='<img src="'+data.url+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px" alt="'+dishName+'">';
+    } else {
+      wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
+    }
+  })
+  .catch(function(){
+    if(wrap) wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
+  });
+}
+
+// ── TIP FUNCTIONS ──
 function openTip(){document.getElementById("tip-modal").classList.remove("hidden");}
 function closeTip(){document.getElementById("tip-modal").classList.add("hidden");}
 
@@ -993,154 +1120,17 @@ function copyPix(){
 
 function confirmTip(){
   if(!selectedTipVal)return;
-  // Grant bonus credits
   usage.bonusPhotos+=selectedTipPhotos;
   usage.bonusIng+=selectedTipIng;
   saveUsage();updateUsageUI();
-  // Notify via EmailJS (if configured) or just log
   var user=JSON.parse(localStorage.getItem("cn_user")||"{}");
   var msg="🎉 Nova gorjeta! Nome: "+(user.nome||"Anônimo")+" | Tel: "+(user.tel||"-")+" | Valor: R$"+selectedTipVal+" | "+new Date().toLocaleString("pt-BR");
-  // Send notification email via simple fetch to our API
   fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({msg:msg,nome:user.nome,tel:user.tel,valor:selectedTipVal})
   }).catch(function(){});
   closeTip();
   setStatus("💚 Muito obrigado! "+selectedTipPhotos+" fotos e "+selectedTipIng+" pesquisas adicionadas!");
   alert("💚 Obrigado pelo apoio! Seus créditos foram adicionados:\n+"+selectedTipPhotos+" fotos\n+"+selectedTipIng+" pesquisas na biblioteca");
-}
-
-// ── COMBO FUNCTIONS ──
-function renderComboGrid(){
-  var q=(document.getElementById("combo-srch")&&document.getElementById("combo-srch").value||"").toLowerCase();
-  var keys=Object.keys(FOODS).filter(function(k){
-    return !q||FOODS[k].name.toLowerCase().includes(q);
-  });
-  document.getElementById("combo-grid").innerHTML=keys.map(function(k){
-    var f=FOODS[k];
-    var picked=comboSelected.indexOf(k)>=0;
-    return '<div class="combo-fc'+(picked?" picked":"")+'" onclick="toggleCombo(this)" data-key="'+k+'"><div class="combo-fc-em">'+f.emoji+'</div><div class="combo-fc-nm">'+f.name+"</div></div>";
-  }).join("");
-}
-
-function toggleCombo(el){
-  var k=el.dataset.key;
-  var idx=comboSelected.indexOf(k);
-  if(idx>=0){
-    comboSelected.splice(idx,1);
-    el.classList.remove("picked");
-  } else {
-    if(comboSelected.length>=5){alert("Máximo de 5 alimentos por combinação.");return;}
-    comboSelected.push(k);
-    el.classList.add("picked");
-  }
-  updateComboSelected();
-}
-
-function updateComboSelected(){
-  var sel=document.getElementById("combo-selected");
-  var btn=document.getElementById("btn-combo");
-  if(comboSelected.length===0){
-    sel.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 0">Nenhum alimento selecionado ainda</div>';
-    btn.disabled=true;
-  } else {
-    sel.innerHTML=comboSelected.map(function(k){
-      var f=FOODS[k];
-      return '<div class="combo-chip">'+f.emoji+' '+f.name+'<button class="combo-chip-rm" onclick="removeCombo(\"'+k+'\")" >×</button></div>';
-    }).join("");
-    btn.disabled=comboSelected.length<2;
-  }
-}
-
-function removeCombo(k){
-  var idx=comboSelected.indexOf(k);
-  if(idx>=0)comboSelected.splice(idx,1);
-  renderComboGrid();
-  updateComboSelected();
-}
-
-function generateCombo(){
-  if(comboSelected.length<2){alert("Selecione pelo menos 2 alimentos.");return;}
-  var btn=document.getElementById("btn-combo");
-  btn.textContent="⏳ Gerando...";btn.disabled=true;
-  var names=comboSelected.map(function(k){return FOODS[k].name;});
-  var emojis=comboSelected.map(function(k){return FOODS[k].emoji;});
-  var p=PROFILES[selProfile];
-  var prompt='Voce e um chef especialista. O usuario tem estes alimentos: '+names.join(', ')+'. Nivel: '+p.prompt+'. Crie 3 receitas que combinam esses ingredientes. Responda APENAS em JSON valido: {"titulo":"string","receitas":[{"n":"nome da receita","tipo":"tipo","tempo":"Xmin","desc":"descricao breve de 1 frase","ingredientes":["ingrediente 1 com quantidade","ingrediente 2"],"passos":["Passo 1","Passo 2","Passo 3","Passo 4"],"dica":"dica do chef"}],"nutri":"paragrafo sobre beneficios nutricionais combinados","harmonizacao":"sugestao de bebida e harmonizacao"}';
-  fetch("/api/analyze",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({imageData:null,mediaType:null,profile:p.prompt,locationCtx:"",comboPrompt:prompt,isCombo:true})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
-    if(data.error)throw new Error(data.error);
-    document.getElementById("combo-result-title").textContent=emojis.join("")+" "+names.join(" + ");
-    var comboReceitas=data.receitas||[];
-    document.getElementById("combo-recs").innerHTML=comboReceitas.map(function(r,i){
-      return '<div class="combo-rec" onclick="showComboDetail('+i+')" style="cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="combo-rec-name">'+r.n+'</div><span style="font-size:10px;color:#1D9E75;font-weight:700">Ver passo a passo →</span></div><div class="combo-rec-meta">'+r.tipo+' · ⏱ '+r.tempo+'</div><div style="font-size:12px;color:#666;margin-top:4px">'+r.desc+'</div></div>';
-    }).join("");
-    window._comboReceitas=comboReceitas;
-    document.getElementById("combo-nutri").textContent=data.nutri||"";
-    document.getElementById("combo-harm").textContent=data.harmonizacao||"";
-    document.getElementById("combo-result-area").style.display="block";
-  })
-  .catch(function(e){
-    btn.textContent="🔀 Gerar receitas combinadas";btn.disabled=false;
-    alert("Erro ao gerar combinação. Tente novamente.");
-  });
-}
-
-function notifyMe(btn){
-  var email=prompt("Informe seu e-mail para ser avisado:");
-  if(email&&email.includes("@")){btn.textContent="✅ Avisaremos você!";btn.disabled=true;}
-}
-
-function showComboDetail(i){
-  var r=window._comboReceitas&&window._comboReceitas[i];
-  if(!r)return;
-  var html='<div style="background:#f8f8f8;border-radius:12px;padding:12px;margin-bottom:12px">';
-  html+='<div style="font-size:14px;font-weight:700;color:#222;margin-bottom:8px">'+r.n+'</div>';
-  // Image placeholder - will be filled by generateDishImage
-  html+='<div id="dish-img-wrap" style="width:100%;height:180px;background:#eee;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden"><div style="text-align:center;color:#aaa"><div style="font-size:28px;margin-bottom:4px">🎨</div><div style="font-size:12px">Gerando imagem do prato...</div></div></div>';
-  if(r.ingredientes&&r.ingredientes.length){
-    html+='<div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;margin-bottom:6px">Ingredientes</div>';
-    html+=r.ingredientes.map(function(ing){return '<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid #eee">• '+ing+'</div>';}).join("");
-  }
-  if(r.passos&&r.passos.length){
-    html+='<div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;margin:10px 0 6px">Modo de preparo</div>';
-    html+=r.passos.map(function(p,j){return '<div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start"><div style="min-width:22px;height:22px;border-radius:50%;background:#1D9E75;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(j+1)+'</div><div style="font-size:12px;color:#555;line-height:1.5;padding-top:2px">'+p+'</div></div>';}).join("");
-  }
-  if(r.dica){
-    html+='<div style="background:#E1F5EE;border-radius:8px;padding:10px;margin-top:8px;font-size:11px;color:#0F6E56"><strong>💡 Dica:</strong> '+r.dica+'</div>';
-  }
-  html+='</div>';
-  document.getElementById("combo-detail").innerHTML=html;
-  document.getElementById("combo-detail-area").style.display="block";
-  document.getElementById("combo-detail-area").scrollIntoView({behavior:"smooth"});
-  // Generate dish image
-  generateDishImage(r.n);
-}
-
-function generateDishImage(dishName){
-  var wrap=document.getElementById("dish-img-wrap");
-  if(!wrap)return;
-  fetch("/api/imagegen",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({dish:dishName})
-  })
-  .then(function(res){return res.json();})
-  .then(function(data){
-    if(data.url){
-      wrap.innerHTML='<img src="'+data.url+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px" alt="'+dishName+'">';
-    } else {
-      wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
-    }
-  })
-  .catch(function(){
-    if(wrap) wrap.innerHTML='<div style="text-align:center;color:#aaa;padding:1rem"><div style="font-size:28px">🍽️</div><div style="font-size:11px;margin-top:4px">Imagem indisponível</div></div>';
-  });
 }
 
 function submitSugg(){
@@ -1151,15 +1141,13 @@ function submitSugg(){
   setTimeout(function(){document.getElementById("sugg-done").classList.add("hidden");},3000);
 }
 
-// ── AUTO INIT — show cadastro or geo on first load ──
+// ── AUTO INIT ──
 (function(){
   var user=localStorage.getItem("cn_user");
   var parsed=user?JSON.parse(user):null;
   if(!parsed||!parsed.tel){
-    // Show cadastro over profile screen
     document.getElementById("cadastro-screen").classList.remove("hidden");
   } else if(!localStorage.getItem("cn_geo_answered")){
-    // Show geo permission
     document.getElementById("geo-screen").classList.remove("hidden");
   }
 })();
